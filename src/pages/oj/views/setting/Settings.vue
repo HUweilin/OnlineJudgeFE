@@ -17,7 +17,6 @@
                 </div>
               </div>
             </div>
-
             <Menu-item name="/setting/profile">Profile</Menu-item>
             <Menu-item name="/setting/account">Account</Menu-item>
             <Menu-item name="/setting/security">Security</Menu-item>

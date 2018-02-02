@@ -20,7 +20,6 @@
     -webkit-font-smoothing: antialiased;
     background-color: #324157;
   }
-
   #app {
     position: absolute;
     top: 0;

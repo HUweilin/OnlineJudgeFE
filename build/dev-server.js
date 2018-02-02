@@ -20,7 +20,6 @@ const autoOpenBrowser = !!config.dev.autoOpenBrowser
 // Define HTTP proxies to your custom API backend
 // https://github.com/chimurai/http-proxy-middleware
 const proxyTable = config.dev.proxyTable
-
 const app = express()
 const compiler = webpack(webpackConfig)
 
@@ -55,13 +54,15 @@ Object.keys(proxyTable).forEach(function (context) {
   }
   app.use(proxyMiddleware(options.filter || context, options))
 })
-
+const reg = /(\/admin\/)|(^\/admin$)/
 // handle fallback for HTML5 history API
 const rewrites = {
-  rewrites: [{
-    from: '/admin/', // 正则或者字符串
-    to: '/admin/index.html', // 字符串或者函数
-  }]
+  rewrites: [
+  {
+    from: reg, // 正则或者字符串
+    to: '/admin/index.html' // 字符串或者函数
+  }
+  ]
 }
 const historyMiddleware = require('connect-history-api-fallback')(rewrites);
 app.use(historyMiddleware)
@@ -93,6 +94,7 @@ devMiddleware.waitUntilValid(() => {
       _reject(err)
     }
     process.env.PORT = port
+    //192.168.1.131
     var uri = 'http://localhost:' + port
     console.log('> Listening at ' + uri + '\n')
     // when env is testing, don't need open it

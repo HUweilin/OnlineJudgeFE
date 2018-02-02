@@ -7,5 +7,6 @@ console.log(`current version is ${version}`)
 module.exports = {
   NODE_ENV: '"development"',
   VERSION: version,
+  // TARGET: '"//192.168.1.139:8000/"',
   USE_SENTRY: '0'
 }

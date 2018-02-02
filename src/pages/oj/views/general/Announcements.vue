@@ -1,16 +1,16 @@
 <template>
-  <Panel shadow :padding="10">
+  <Panel shadow :padding="0">
     <div slot="title">
       {{title}}
     </div>
     <div slot="extra">
-      <Button v-if="listVisible" type="info" @click="init" :loading="btnLoading">Refresh</Button>
-      <Button v-else type="ghost" icon="ios-undo" @click="goBack">Back</Button>
+      <Button v-if="listVisible" type="info" @click="init" :loading="btnLoading">刷新</Button>
+      <Button v-else type="ghost" icon="ios-undo" @click="goBack">返回</Button>
     </div>
 
     <transition-group name="announcement-animate" mode="in-out">
       <div class="no-announcement" v-if="!announcements.length" key="no-announcement">
-        <p>No announcements</p>
+        <p>暂无公告</p>
       </div>
       <template v-if="listVisible">
         <ul class="announcements-container" key="list">
@@ -19,7 +19,7 @@
               <div class="title"><a class="entry" @click="goAnnouncement(announcement)">
                 {{announcement.title}}</a></div>
               <div class="date">{{announcement.create_time | localtime }}</div>
-              <div class="creator"> By {{announcement.created_by.username}}</div>
+              <div class="creator">{{announcement.created_by.username}}</div>
             </div>
           </li>
         </ul>
@@ -108,7 +108,7 @@
     computed: {
       title () {
         if (this.listVisible) {
-          return this.isContest ? 'Contest Announcements' : 'Announcements'
+          return this.isContest ? '比赛公告' : '公告'
         } else {
           return this.announcement.title
         }
@@ -153,13 +153,13 @@
         }
         .date {
           flex: none;
+          font-size: 10px;
           width: 200px;
           text-align: center;
         }
       }
     }
   }
-
   .content-container {
     padding: 0 20px 20px 20px;
   }
@@ -171,5 +171,54 @@
 
   .announcement-animate-enter-active {
     animation: fadeIn 1s;
+  }
+  @media screen and (max-width: 767px){
+    .panel-title {
+      &>div {
+        width: 60%;
+        font-size: 16px;
+        line-height: 1.2;
+        font-weight: bold;
+      }
+    }
+    .announcements-container {
+      li {
+      margin-left: 0;
+      font-size: 12px;
+      .flex-container {
+        .title {
+          flex: 1;
+          flex-flow: row wrap;
+          padding: 0 5px 0 0;
+          text-align: center;
+          min-width: 90px;
+          min-height: 35px;
+          overflow: hidden;
+          text-overflow:ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
+        .date {
+          flex: 1;
+          flex-flow: row wrap;
+          text-align: center;
+          padding-right: 5px;
+        }
+        .creator {
+          flex: 1;
+          flex-flow: row wrap;
+          text-align: center;
+          min-width: 90px;
+          min-height: 35px;
+          overflow: hidden;
+          text-overflow:ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
+      }
+      }
+    }
   }
 </style>

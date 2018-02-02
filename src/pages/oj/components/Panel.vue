@@ -63,5 +63,6 @@
   .panel-body {
     word-break: break-all;
     word-wrap: break-word;
+    padding: 0;
   }
 </style>

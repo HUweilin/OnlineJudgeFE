@@ -3,7 +3,7 @@
     <Row type="flex" justify="space-between" class="header">
       <Col :span=10>
       <div>
-        <span>Language:</span>
+        <span>语言:</span>
         <Select :value="language" @on-change="onLangChange" class="adjust">
           <Option v-for="item in languages" :key="item" :value="item">{{item}}
           </Option>
@@ -12,7 +12,7 @@
       </Col>
       <Col :span=10>
       <div class="fl-right">
-        <span>Theme:</span>
+        <span>背景:</span>
         <Select v-model="options.theme" @on-change="onThemeChange" class="adjust">
           <Option v-for="item in themes" :key="item.label" :value="item.value">{{item.label}}
           </Option>

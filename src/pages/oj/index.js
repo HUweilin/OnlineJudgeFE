@@ -4,10 +4,14 @@ import App from './App.vue'
 import router from './router'
 import store from '@/store'
 import VueClipboard from 'vue-clipboard2'
-import locale from 'iview/src/locale/lang/en-US'
+// import locale from 'iview/src/locale/lang/en-US'
+// import locale from 'iview/src/locale/lang/zh-CN'
 
 import iView from 'iview'
 import 'iview/dist/styles/iview.css'
+
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.min.js'
 
 import Panel from '@oj/components/Panel.vue'
 import VerticalMenu from '@oj/components/verticalMenu/verticalMenu.vue'
@@ -69,7 +73,8 @@ Vue.directive('highlight', {
 })
 
 Vue.config.productionTip = false
-Vue.use(iView, {locale})
+// Vue.use(iView, {locale})
+Vue.use(iView)
 Vue.use(VueClipboard)
 
 Vue.component('ECharts', ECharts)
@@ -81,6 +86,7 @@ Vue.component(Panel.name, Panel)
 
 // 注册全局消息提示
 Vue.prototype.$Message.config({
+  top: 100,
   duration: 2
 })
 Vue.prototype.$error = (s) => Vue.prototype.$Message.error(s)

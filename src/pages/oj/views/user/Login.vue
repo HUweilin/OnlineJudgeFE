@@ -23,10 +23,10 @@
         @click="handleLogin"
         class="btn" long
         :loading="btnLoginLoading">
-        Login
+        立即登录
       </Button>
-      <a v-if="website.allow_register" @click.stop="handleBtnClick('register')">No account? Register now!</a>
-      <a @click.stop="goResetPassword" style="float: right">Forget Password</a>
+      <a v-if="website.allow_register" @click.stop="handleBtnClick('register')">没有账户? 马上注册!</a>
+      <a @click.stop="goResetPassword" style="float: right">忘记密码 >></a>
     </div>
   </div>
 </template>
@@ -86,7 +86,7 @@
             this.btnLoginLoading = false
             this.changeModalStatus({visible: false})
             this.getProfile()
-            this.$success('Welcome back to OJ')
+            this.$success('欢迎使用 OJ')
           }, _ => {
             this.btnLoginLoading = false
           })

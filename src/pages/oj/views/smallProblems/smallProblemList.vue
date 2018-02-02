@@ -11,43 +11,20 @@
                 shape="circle"
                 class="tag-btn">{{tag.name}}
         </Button>
-        <Button long id="pick-one" @click="pickone">
-          <Icon type="shuffle"></Icon>
-          Pick one
-        </Button>
+        <Spin v-if="loadings.tag" fix size="large"></Spin>
       </Panel>
-      <Spin v-if="loadings.tag" fix size="large"></Spin>
     </Col>
     <Col :sm="19" :xs="24">
       <Panel shadow>
-        <div slot="title">编程题列表</div>
+        <div slot="title">小题列表</div>
         <div slot="extra">
           <ul class="filter">
             <li>
-              <Dropdown @on-click="filterByDifficulty">
-                <span>{{query.difficulty === '' ? 'Difficulty' : query.difficulty}}
-                  <Icon type="arrow-down-b"></Icon>
-                </span>
-                <Dropdown-menu slot="list">
-                  <Dropdown-item name="">All</Dropdown-item>
-                  <Dropdown-item name="Low">Low</Dropdown-item>
-                  <Dropdown-item name="Mid">Mid</Dropdown-item>
-                  <Dropdown-item name="High">High</Dropdown-item>
-                </Dropdown-menu>
-              </Dropdown>
-            </li>
-            <!-- <li>
-              <i-switch size="large" @on-change="handleTagsVisible">
-                <span slot="open">Tags</span>
-                <span slot="close">Tags</span>
-              </i-switch>
-            </li> -->
-            <li>
-              <Input v-model="query.keyword"
-                     @on-enter="filterByKeyword"
-                     @on-click="filterByKeyword"
-                     placeholder="关键词"
-                     icon="ios-search-strong"/>
+              <Input v-model="query.keyword" 
+              @on-enter="filterByKeyword" 
+              @on-click="filterBykeyword"
+              icon="ios-search-strong"
+              placeholder="关键词"/>
             </li>
             <li>
               <Button type="info" @click="onReset">
@@ -57,31 +34,25 @@
             </li>
           </ul>
         </div>
-        <Table ref="table" style="width: 100%; font-size: 16px;"
-               :columns="problemTableColumns"
-               :height="clientHeight"
-               :data="problemList"
-               :loading="loadings.table"
-               size="small"
-               disabled-hover></Table>
+        <Table ref="table" style="width: 100%; font-size: 16px;" 
+        :columns="problemTableColumns"
+        :data="problemList"
+        :loading="loadings.table"
+        size="small"></Table>
       </Panel>
       <Pagination :total="total" :page-size="limit" @on-change="pushRouter" :current.sync="query.page"></Pagination>
     </Col>
-
-    
   </Row>
 </template>
-
 <script>
-  import { mapGetters } from 'vuex'
-  import api from '@oj/api'
+  import Pagination from '@oj/components/Pagination'
   import utils from '@/utils/utils'
   import { client } from '@/utils/dom.js'
   import { ProblemMixin } from '@oj/components/mixins'
-  import Pagination from '@oj/components/Pagination'
-  
+  import { mapGetters } from 'vuex'
+
   export default {
-    name: 'ProblemList',
+    name: 'smallProblemList',
     mixins: [ProblemMixin],
     components: {
       Pagination
@@ -101,7 +72,7 @@
                 },
                 on: {
                   click: () => {
-                    this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
+                    this.$router.push({name: 'small-problem-details', params: {problemID: params.row._id}})
                   }
                 },
                 style: {
@@ -121,27 +92,13 @@
                 },
                 on: {
                   click: () => {
-                    this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
+                    this.$router.push({name: 'small-problem-details', params: {problemID: params.row._id}})
                   }
                 },
                 style: {
                   padding: '2px 0'
                 }
               }, params.row.title)
-            }
-          },
-          {
-            title: '难度',
-            render: (h, params) => {
-              let t = params.row.difficulty
-              let color = 'blue'
-              if (t === 'Low') color = 'green'
-              else if (t === 'High') color = 'yellow'
-              return h('Tag', {
-                props: {
-                  color: color
-                }
-              }, params.row.difficulty)
             }
           },
           {
@@ -172,20 +129,18 @@
           }
         ],
         problemList: [],
+        query: {
+          keyword: '',
+          tag: '',
+          page: 1
+        },
+        // 每页题目条数,还有题目总数total
         limit: 20,
         total: 0,
         loadings: {
           table: true,
           tag: true
-        },
-        routeName: '',
-        query: {
-          keyword: '',
-          difficulty: '',
-          tag: '',
-          page: 1
-        },
-        clientHeight: 0
+        }
       }
     },
     mounted () {
@@ -198,94 +153,69 @@
       }
     },
     methods: {
-      init (simulate = false) {
-        this.routeName = this.$route.name
-        let query = this.$route.query
-        this.query.difficulty = query.difficulty || ''
+      init (bool = false) {
+        // 1、将地址栏的参数赋值进来，然后获取tag列表,小题列表
+        /* 这里获取地址栏的参数,比如你筛选条件后刷新,这时要重新把参数赋值到变量中 此时加载页面会把参数传递给后台
+        */
+        let query = this.$route.name
         this.query.keyword = query.keyword || ''
         this.query.tag = query.tag || ''
         this.query.page = parseInt(query.page) || 1
-        if (this.query.page < 1) {
-          this.query.page = 1
-        }
-        if (!simulate) {
+        // 第一次加载或者刷新页面时需要请求tag列表
+        if (!bool) {
           this.getTagList()
         }
         this.getProblemList()
       },
       pushRouter () {
         this.$router.push({
-          name: 'problem-list',
+          name: 'small-problem-list',
           query: utils.filterEmptyValue(this.query)
         })
       },
+      getTagList () {
+        /* api.getxxx().then(res => {
+          this.tagList = res.data.xxx
+          this.loadings.tag = false
+        }, res => {
+          this.loadings.tag = false
+        })
+        */
+      },
       getProblemList () {
-        let offset = (this.query.page - 1) * this.limit
+        // 偏移量
+        // let offset = ( this.query.page - 1 ) * this.limit
         this.loadings.table = true
-        api.getProblemList(offset, this.limit, this.query).then(res => {
+        /*  //发送请求
+        api.getxxx(offset,this.limit,this,query).then(res => {
           this.loadings.table = false
-          this.total = res.data.data.total
-          this.problemList = res.data.data.results
+          //设置总页数
+          this.total = res.data.xxx
+          this.problemList = res.data.xxx
+          // 假如登录了,表格最左侧添加一栏状态 (提交过的显示通过
+          // 不通过) isAuthenticated在watch里有监控 登录后会调用init
+          // 所以可以在getProblemList判断
           if (this.isAuthenticated) {
-            this.addStatusColumn(this.problemTableColumns, res.data.data.results)
+            this.addStatusColumn(this.problemTableColumns, res.data.data.xxx)
           }
         }, res => {
           this.loadings.table = false
         })
+        */
       },
-      getTagList () {
-        api.getProblemTagList().then(res => {
-          this.tagList = res.data.data
-          this.loadings.tag = false
-        }, res => {
-          this.loadings.tag = false
-        })
+      onReset () {
+        this.$route.push({name: 'small-problem-list'})
       },
-      filterByTag (tagName) {
-        this.query.tag = tagName
-        this.query.page = 1
-        this.pushRouter()
-      },
-      filterByDifficulty (difficulty) {
-        this.query.difficulty = difficulty
+      filterByTag (tag) {
+        this.query.tag = tag
+        // 设置筛选条件后 重新请求数据 page初始为1
         this.query.page = 1
         this.pushRouter()
       },
       filterByKeyword () {
+        // 原因同上
         this.query.page = 1
         this.pushRouter()
-      },
-      // handleTagsVisible (value) {
-      //   if (value) {
-      //     this.problemTableColumns.push(
-      //       {
-      //         title: 'Tags',
-      //         align: 'center',
-      //         width: '200px',
-      //         render: (h, params) => {
-      //           let tags = []
-      //           params.row.tags.forEach(tag => {
-      //             tags.push(h('Tag', {}, tag))
-      //           })
-      //           return h('div', {
-      //             style: {
-      //               margin: '8px 0'
-      //             }
-      //           }, tags)
-      //         }
-      //       })
-      //   } else {
-      //     this.problemTableColumns.splice(this.problemTableColumns.length - 1, 1)
-      //   }
-      // },
-      onReset () {
-        this.$router.push({name: 'problem-list'})
-      },
-      pickone () {
-        api.pickone().then(res => {
-          this.$success('Good Luck')
-          this.$router.push({name: 'problem-details', params: {problemID: res.data.data}})
-        })
       },
       // 根据屏幕高度设置表格高度
       tableHeight () {
@@ -328,6 +258,7 @@
     watch: {
       '$route' (newVal, oldVal) {
         if (newVal !== oldVal) {
+          // 参数为true 则不用重新获取tag列表
           this.init(true)
         }
       },
@@ -339,29 +270,9 @@
     }
   }
 </script>
-
 <style scoped lang="less">
-  // 缩小屏幕会出现横向滚动条,设置100%让其与父级保持同一宽度
-  // 因为给Row设置了gutter导致
-  .ivu-row-flex {
-    width: 100%;
-    .ivu-col-span-sm-4 {
-      .ivu-card {
-        overflow-y: auto;
-      }
-    }
-  }
-  .taglist-title {
-    margin-left: -10px;
-    margin-bottom: -10px;
-  }
-
   .tag-btn {
     margin-right: 5px;
     margin-bottom: 10px;
-  }
-
-  #pick-one {
-    margin-top: 10px;
   }
 </style>

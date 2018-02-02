@@ -3,21 +3,39 @@
     <div id="problem-main">
       <!--problem main-->
       <Panel :padding="40" shadow>
-        <div slot="title">{{problem.title}}</div>
+        <div slot="title" style="font-size: 16px;">
+          <div class="info">
+            <span class="single-info title">{{problem.title}}</span>
+            <span class="single-info id">题目编号:&nbsp;{{problem._id}}</span>
+            <Poptip class="single-info" trigger="hover" placement="top" v-if="problem.tags.length">
+              <a>标签</a>
+              <div slot="content">
+                <Tag v-for="tag in problem.tags" :key="tag">{{tag}}</Tag>
+              </div>
+            </Poptip>
+          <Button type="primary" icon="compose">提交</Button>
+          </div>
+          <div class="info">
+            <span class="single-info">时间限制(ms):&nbsp;{{problem.time_limit}}</span>
+            <span class="single-info">空间限制(kb):&nbsp;{{problem.memory_limit}}</span>
+            <span class="single-info">提交数:&nbsp;{{problem.submission_number}}</span>
+            <span class="single-info">通过数:&nbsp;{{problem.accepted_number}}</span>
+          </div>
+        </div>
         <div id="problem-content" class="markdown-body">
-          <p class="title">Description</p>
+          <p class="title">题目描述</p>
           <p class="content" v-html=problem.description></p>
 
-          <p class="title">Input</p>
+          <p class="title">输入描述</p>
           <p class="content" v-html=problem.input_description></p>
 
-          <p class="title">Output</p>
+          <p class="title">输出描述</p>
           <p class="content" v-html=problem.output_description></p>
 
           <div v-for="sample, index in problem.samples">
             <div class="flex-container sample">
               <div class="sample-input">
-                <p class="title">Sample Input {{index + 1}}
+                <p class="title">输入样例 {{index + 1}}
                   <a class="copy"
                      v-clipboard:copy="sample.input"
                      v-clipboard:success="onCopy"
@@ -28,21 +46,21 @@
                 <pre>{{sample.input}}</pre>
               </div>
               <div class="sample-output">
-                <p class="title">Sample Output {{index + 1}}</p>
+                <p class="title">输出样例 {{index + 1}}</p>
                 <pre>{{sample.output}}</pre>
               </div>
             </div>
           </div>
 
           <div v-if="problem.hint">
-            <p class="title">Hint</p>
+            <p class="title">示例</p>
             <Card dis-hover>
               <div class="content" v-html=problem.hint></div>
             </Card>
           </div>
 
           <div v-if="problem.source">
-            <p class="title">Source</p>
+            <p class="title">来自</p>
             <p class="content">{{problem.source}}</p>
           </div>
 
@@ -127,7 +145,7 @@
         </template>
       </VerticalMenu>
 
-      <Card id="info">
+      <!-- <Card id="info">
         <div slot="title" class="header">
           <Icon type="information-circled"></Icon>
           <span class="card-title">Information</span>
@@ -163,7 +181,7 @@
             </p>
           </li>
         </ul>
-      </Card>
+      </Card> -->
 
       <Card id="pieChart" :padding="0" v-if="!this.contestID || OIContestRealTimePermission">
         <div slot="title">
@@ -487,6 +505,18 @@
     #problem-main {
       flex: auto;
       margin-right: 18px;
+      .panel-title {
+        .info {
+          display: flex;
+          margin-bottom: 5px;
+          .single-info {
+            flex: auto;
+            &:last-child {
+              text-align: right;
+            }
+          }
+        }
+      }
     }
     #right-column {
       flex: none;
@@ -547,7 +577,7 @@
     }
   }
 
-  #info {
+  /*#info {
     margin-bottom: 20px;
     margin-top: 20px;
     ul {
@@ -566,7 +596,7 @@
         }
       }
     }
-  }
+  }*/
 
   .fl-right {
     float: right;

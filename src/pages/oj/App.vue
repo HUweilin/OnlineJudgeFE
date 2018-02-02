@@ -5,10 +5,11 @@
       <transition name="fadeInUp" mode="out-in">
         <router-view></router-view>
       </transition>
-      <div class="footer">
-        <p v-html="website.website_footer"></p>
-        <p>Powered by <a href="https://github.com/QingdaoU/OnlineJudge">OnlineJudge</a>
-          <span v-if="version">&nbsp; Version: {{ version }}</span>
+      <div id="footer">
+        <!-- <p v-html="website.website_footer"></p> -->
+        <p>学院网站: <a href="http://www.gpnu.edu.cn/">广技师官网</a>&nbsp;&nbsp;<a href="http://sxxy.gpnu.edu.cn/">数学院官网</a></p>
+        <p>友情链接: <a href="http://114.215.99.34">DI Studio-OJ</a>&nbsp;&nbsp;<a href="http://acm.hdu.edu.cn/">HDU-OJ</a>
+          <!-- <span v-if="version">&nbsp; Version: {{ version }}</span> -->
         </p>
       </div>
     </div>
@@ -19,7 +20,6 @@
 <script>
   import { mapActions, mapState } from 'vuex'
   import NavBar from '@oj/components/NavBar.vue'
-
   export default {
     name: 'app',
     components: {
@@ -63,7 +63,12 @@
     -moz-box-sizing: border-box;
     box-sizing: border-box;
   }
-
+  // 新增
+  body {
+    min-width: 100%;
+    width: 100%;
+    height: 100%;
+  }
   a {
     text-decoration: none;
     background-color: transparent;
@@ -74,15 +79,25 @@
 
 
   .content-app {
-    margin-top: 80px;
+    width: 100%;
+    margin-top: 20px;
     padding: 0 2%;
+    @media screen and (max-width: 750px) {
+      margin-top: 10px;
+      padding: 0 5px;
+    }
   }
 
-  .footer {
+  #footer {
     margin-top: 20px;
     margin-bottom: 10px;
     text-align: center;
     font-size: small;
+    font-size: 10px;
+    p {
+      margin: 0;
+      line-height: 1.5;
+    }
   }
 
   .fadeInUp-enter-active {

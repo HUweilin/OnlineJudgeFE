@@ -1,4 +1,5 @@
 import ProblemList from './problem/ProblemList.vue'
+import smallProblemList from './smallProblems/smallProblemList.vue'
 import Logout from './user/Logout.vue'
 import UserHome from './user/UserHome.vue'
 import About from './help/About.vue'
@@ -18,11 +19,12 @@ const ApplyResetPassword = () => import(/* webpackChunkName: "password" */ '@oj/
 const ResetPassword = () => import(/* webpackChunkName: "password" */ '@oj/views/user/ResetPassword.vue')
 
 const Problem = () => import(/* webpackChunkName: "Problem" */ '@oj/views/problem/Problem.vue')
+const smallProblem = () => import(/* webpackChunkName: "smallProblems" */ '@oj/views/smallProblems/smallProblem.vue')
 
 export {
   Home, NotFound, Announcements,
   Logout, UserHome, About, FAQ,
-  ProblemList, Problem,
+  ProblemList, Problem, smallProblemList, smallProblem,
   ACMRank, OIRank,
   SubmissionList, SubmissionDetails,
   ApplyResetPassword, ResetPassword

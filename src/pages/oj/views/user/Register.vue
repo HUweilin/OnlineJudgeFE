@@ -2,29 +2,29 @@
 <div>
     <Form ref="formRegister" :model="formRegister" :rules="ruleRegister">
       <FormItem prop="username">
-        <Input type="text" v-model="formRegister.username" placeholder="Username" size="large" @on-enter="handleRegister">
+        <Input type="text" v-model="formRegister.username" placeholder="用户名" size="large" @on-enter="handleRegister">
         <Icon type="ios-person-outline" slot="prepend"></Icon>
         </Input>
       </FormItem>
       <FormItem prop="email">
-        <Input v-model="formRegister.email" placeholder="Email Address" size="large" @on-enter="handleRegister">
+        <Input v-model="formRegister.email" placeholder="邮箱" size="large" @on-enter="handleRegister">
         <Icon type="ios-email-outline" slot="prepend"></Icon>
         </Input>
       </FormItem>
       <FormItem prop="password">
-        <Input type="password" v-model="formRegister.password" placeholder="Password" size="large" @on-enter="handleRegister">
+        <Input type="password" v-model="formRegister.password" placeholder="密码" size="large" @on-enter="handleRegister">
         <Icon type="ios-locked-outline" slot="prepend"></Icon>
         </Input>
       </FormItem>
       <FormItem prop="passwordAgain">
-        <Input type="password" v-model="formRegister.passwordAgain" placeholder="Password Again" size="large" @on-enter="handleRegister">
+        <Input type="password" v-model="formRegister.passwordAgain" placeholder="确认密码" size="large" @on-enter="handleRegister">
         <Icon type="ios-locked-outline" slot="prepend"></Icon>
         </Input>
       </FormItem>
       <FormItem prop="captcha" style="margin-bottom:10px">
         <div class="oj-captcha">
           <div class="oj-captcha-code">
-            <Input v-model="formRegister.captcha" placeholder="Captcha" size="large" @on-enter="handleRegister">
+            <Input v-model="formRegister.captcha" placeholder="验证码" size="large" @on-enter="handleRegister">
             <Icon type="ios-lightbulb-outline" slot="prepend"></Icon>
             </Input>
           </div>
@@ -48,7 +48,7 @@
         type="ghost"
         @click="switchMode('login')"
         class="btn" long>
-        Already registed? Login now!
+        已有账户? 去登录!
       </Button>
     </div>
   </div>
