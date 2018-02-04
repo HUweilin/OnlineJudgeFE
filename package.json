@@ -27,7 +27,6 @@
     "screenfull": "^3.3.2",
     "simditor": "^2.3.6",
     "simditor-markdown": "^1.1.2",
-    "uiv": "^0.16.1",
     "vue": "^2.5.13",
     "vue-clipboard2": "0.0.7",
     "vue-codemirror-lite": "^1.0.3",

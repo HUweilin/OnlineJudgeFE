@@ -11,7 +11,7 @@ export default {
       return new Promise((resolve, reject) => {
         this.$refs[formName].validate(valid => {
           if (!valid) {
-            this.$error('please validate the error fields')
+            this.$error('输入有误!请正确填写')
           } else {
             resolve(valid)
           }

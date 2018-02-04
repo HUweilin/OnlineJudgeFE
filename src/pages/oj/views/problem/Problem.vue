@@ -1,209 +1,173 @@
 <template>
-  <div class="flex-container">
-    <div id="problem-main">
-      <!--problem main-->
-      <Panel :padding="40" shadow>
-        <div slot="title" style="font-size: 16px;">
-          <div class="info">
-            <span class="single-info title">{{problem.title}}</span>
-            <span class="single-info id">题目编号:&nbsp;{{problem._id}}</span>
-            <Poptip class="single-info" trigger="hover" placement="top" v-if="problem.tags.length">
-              <a>标签</a>
-              <div slot="content">
-                <Tag v-for="tag in problem.tags" :key="tag">{{tag}}</Tag>
-              </div>
-            </Poptip>
-          <Button type="primary" icon="compose">提交</Button>
-          </div>
-          <div class="info">
-            <span class="single-info">时间限制(ms):&nbsp;{{problem.time_limit}}</span>
-            <span class="single-info">空间限制(kb):&nbsp;{{problem.memory_limit}}</span>
-            <span class="single-info">提交数:&nbsp;{{problem.submission_number}}</span>
-            <span class="single-info">通过数:&nbsp;{{problem.accepted_number}}</span>
-          </div>
-        </div>
-        <div id="problem-content" class="markdown-body">
-          <p class="title">题目描述</p>
-          <p class="content" v-html=problem.description></p>
-
-          <p class="title">输入描述</p>
-          <p class="content" v-html=problem.input_description></p>
-
-          <p class="title">输出描述</p>
-          <p class="content" v-html=problem.output_description></p>
-
-          <div v-for="sample, index in problem.samples">
-            <div class="flex-container sample">
-              <div class="sample-input">
-                <p class="title">输入样例 {{index + 1}}
-                  <a class="copy"
-                     v-clipboard:copy="sample.input"
-                     v-clipboard:success="onCopy"
-                     v-clipboard:error="onCopyError">
-                    <Icon type="clipboard"></Icon>
-                  </a>
-                </p>
-                <pre>{{sample.input}}</pre>
-              </div>
-              <div class="sample-output">
-                <p class="title">输出样例 {{index + 1}}</p>
-                <pre>{{sample.output}}</pre>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="problem.hint">
-            <p class="title">示例</p>
-            <Card dis-hover>
-              <div class="content" v-html=problem.hint></div>
-            </Card>
-          </div>
-
-          <div v-if="problem.source">
-            <p class="title">来自</p>
-            <p class="content">{{problem.source}}</p>
-          </div>
-
-        </div>
-      </Panel>
-      <!--problem main end-->
-      <Card :padding="20" id="submit-code" dis-hover>
-        <CodeMirror :value.sync="code" @changeLang="onChangeLang" :languages="problem.languages"
-                    :language="language"></CodeMirror>
-        <Row type="flex" justify="space-between">
-          <Col :span="10">
-          <div class="status" v-if="statusVisible">
-            <template v-if="!this.contestID || (this.contestID && OIContestRealTimePermission)">
-              <span>Status:</span>
-              <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
-                {{submissionStatus.text}}
-              </Tag>
-            </template>
-            <template v-else-if="this.contestID && !OIContestRealTimePermission">
-              <Alert type="success" show-icon>Submitted successfully</Alert>
-            </template>
-          </div>
-          <div v-else-if="problem.my_status === 0">
-            <Alert type="success" show-icon>You have solved the problem</Alert>
-          </div>
-          <div v-else-if="this.contestID && !OIContestRealTimePermission && submissionExists">
-            <Alert type="success" show-icon>You have submitted a solution.</Alert>
-          </div>
-          <div v-if="contestEnded">
-            <Alert type="warning" show-icon>Contest has ended</Alert>
-          </div>
-          </Col>
-
-          <Col :span="12">
-          <template v-if="captchaRequired">
-            <div class="captcha-container">
-              <Tooltip v-if="captchaRequired" content="Click to refresh" placement="top">
-                <img :src="captchaSrc" @click="getCaptchaSrc"/>
-              </Tooltip>
-              <Input v-model="captchaCode" class="captcha-code"/>
-            </div>
-          </template>
-          <Button type="warning" icon="edit" :loading="submitting" @click="submitCode" :disabled="problemSubmitDisabled"
-                  class="fl-right">
-            <span v-if="!submitting">Submit</span>
-            <span v-else>Submitting</span>
-          </Button>
-          </Col>
-        </Row>
-      </Card>
-    </div>
-
-    <div id="right-column">
-      <VerticalMenu @on-click="handleRoute">
-        <template v-if="this.contestID">
-          <VerticalMenu-item :route="{name: 'contest-problem-list', params: {contestID: contestID}}">
-            <Icon type="ios-photos"></Icon>
-            Problems
-          </VerticalMenu-item>
-
-          <VerticalMenu-item :route="{name: 'contest-announcement-list', params: {contestID: contestID}}">
-            <Icon type="chatbubble-working"></Icon>
-            Announcements
-          </VerticalMenu-item>
-        </template>
-
-        <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission" :route="submissionRoute">
-          <Icon type="navicon-round"></Icon>
-          Submissions
-        </VerticalMenu-item>
-
-        <template v-if="this.contestID">
-          <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission"
-                             :route="{name: 'contest-rank', params: {contestID: contestID}}">
-            <Icon type="stats-bars"></Icon>
-            Rankings
-          </VerticalMenu-item>
-          <VerticalMenu-item :route="{name: 'contest-details', params: {contestID: contestID}}">
-            <Icon type="home"></Icon>
-            View Contest
-          </VerticalMenu-item>
-        </template>
-      </VerticalMenu>
-
-      <!-- <Card id="info">
-        <div slot="title" class="header">
-          <Icon type="information-circled"></Icon>
-          <span class="card-title">Information</span>
-        </div>
-        <ul>
-          <li><p>ID</p>
-            <p>{{problem._id}}</p></li>
-          <li>
-            <p>Time Limit</p>
-            <p>{{problem.time_limit}}MS</p></li>
-          <li>
-            <p>Memory Limit</p>
-            <p>{{problem.memory_limit}}MB</p></li>
-          <li>
-            <p>Created By</p>
-            <p>{{problem.created_by.username}}</p></li>
-          <li v-if="problem.difficulty">
-            <p>Level</p>
-            <p>{{problem.difficulty}}</p></li>
-          <li v-if="problem.total_score">
-            <p>Score</p>
-            <p>{{problem.total_score}}</p>
-          </li>
-          <li>
-            <p>Tags</p>
-            <p>
-              <Poptip trigger="hover" placement="left-end">
-                <a>Show</a>
+  <Row type="flex" justify="space-between" class="problem-wrapper">
+    <Col :xs="24" :sm="19">
+      <div id="problem-main">
+        <!--problem main-->
+        <Panel :padding="40" shadow>
+          <div slot="title" style="font-size: 16px;">
+            <div class="info">
+              <span class="single-info">{{problem.title}}</span>
+              <span class="single-info">ID:&nbsp;{{problem._id}}</span>
+              <Poptip class="single-info" trigger="hover" placement="top" v-if="problem.tags.length">
+                <a>标签</a>
                 <div slot="content">
                   <Tag v-for="tag in problem.tags" :key="tag">{{tag}}</Tag>
                 </div>
               </Poptip>
-            </p>
-          </li>
-        </ul>
-      </Card> -->
+            <div class="single-info"><Button type="primary" @click="codeVisible=!codeVisible" icon="compose" :disabled="problemSubmitDisabled">提交</Button></div>
+            </div>
+            <div class="info">
+              <span class="single-info">时间限制(ms):&nbsp;{{problem.time_limit}}</span>
+              <span class="single-info">空间限制(kb):&nbsp;{{problem.memory_limit}}</span>
+              <span class="single-info">提交数:&nbsp;{{problem.submission_number}}</span>
+              <span class="single-info">通过数:&nbsp;{{problem.accepted_number}}</span>
+            </div>
+          </div>
+          <div id="problem-content" ref="problemContent" class="markdown-body">
+            <p class="title">题目描述</p>
+            <p class="content" v-html=problem.description></p>
 
-      <Card id="pieChart" :padding="0" v-if="!this.contestID || OIContestRealTimePermission">
-        <div slot="title">
-          <Icon type="ios-analytics"></Icon>
-          <span class="card-title">Statistic</span>
-          <Button type="ghost" size="small" id="detail" @click="graphVisible = !graphVisible">Details</Button>
-        </div>
-        <div class="echarts">
-          <ECharts :options="pie"></ECharts>
-        </div>
-      </Card>
-    </div>
+            <p class="title">输入描述</p>
+            <p class="content" v-html=problem.input_description></p>
 
+            <p class="title">输出描述</p>
+            <p class="content" v-html=problem.output_description></p>
+
+            <div v-for="sample, index in problem.samples">
+              <div class="flex-container sample">
+                <div class="sample-input">
+                  <p class="title">输入样例 {{index + 1}}
+                    <a class="copy"
+                       v-clipboard:copy="sample.input"
+                       v-clipboard:success="onCopy"
+                       v-clipboard:error="onCopyError">
+                      <Icon type="clipboard"></Icon>
+                    </a>
+                  </p>
+                  <pre>{{sample.input}}</pre>
+                </div>
+                <div class="sample-output">
+                  <p class="title">输出样例 {{index + 1}}</p>
+                  <pre>{{sample.output}}</pre>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="problem.hint">
+              <p class="title">提示</p>
+              <Card dis-hover>
+                <div class="content" v-html=problem.hint></div>
+              </Card>
+            </div>
+
+            <div v-if="problem.source">
+              <p class="title">来自</p>
+              <p class="content">{{problem.source}}</p>
+            </div>
+          </div>
+        </Panel>
+        <!--problem main end-->
+      </div>
+    </Col>
+
+    <Col :xs="24" :sm="4">
+      <div id="right-column">
+        <VerticalMenu @on-click="handleRoute">
+          <template v-if="this.contestID">
+            <VerticalMenu-item :route="{name: 'contest-problem-list', params: {contestID: contestID}}">
+              <Icon type="ios-photos"></Icon>
+              题目
+            </VerticalMenu-item>
+
+            <VerticalMenu-item :route="{name: 'contest-announcement-list', params: {contestID: contestID}}">
+              <Icon type="chatbubble-working"></Icon>
+              竞赛公告
+            </VerticalMenu-item>
+          </template>
+
+          <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission" :route="submissionRoute">
+            <Icon type="navicon-round"></Icon>
+            提交者
+          </VerticalMenu-item>
+
+          <template v-if="this.contestID">
+            <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission"
+                               :route="{name: 'contest-rank', params: {contestID: contestID}}">
+              <Icon type="stats-bars"></Icon>
+              排行榜
+            </VerticalMenu-item>
+            <VerticalMenu-item :route="{name: 'contest-details', params: {contestID: contestID}}">
+              <Icon type="home"></Icon>
+              View Contest
+            </VerticalMenu-item>
+          </template>
+        </VerticalMenu>
+
+        <Card style="margin-top: 5px;" id="pieChart" :padding="0" v-if="!this.contestID || OIContestRealTimePermission">
+          <div slot="title">
+            <Icon type="ios-analytics"></Icon>
+            <span class="card-title">统计</span>
+            <Button type="ghost" size="small" id="detail" @click="graphVisible = !graphVisible">详情</Button>
+          </div>
+        </Card>
+      </div>
+    </Col>
     <Modal v-model="graphVisible">
       <div id="pieChart-detail">
         <ECharts :options="largePie" :initOptions="largePieInitOpts"></ECharts>
       </div>
       <div slot="footer">
-        <Button type="ghost" @click="graphVisible=false">Close</Button>
+        <Button type="ghost" @click="graphVisible=false">关闭</Button>
       </div>
     </Modal>
-  </div>
+    <!-- 提交代码弹窗 B -->
+    <Modal v-model="codeVisible" transfer="false" width="1000px">
+        <CodeMirror :value.sync="code" @changeLang="onChangeLang" :languages="problem.languages" :language="language" 
+        v-if="codeVisible"></CodeMirror>
+        <Row type="flex" justify="space-between">
+          <Col :span="10">
+            <div class="status" v-if="statusVisible">
+              <template v-if="!this.contestID || (this.contestID && OIContestRealTimePermission)">
+                <span>状态:</span>
+                <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
+                  {{submissionStatus.text}}
+                </Tag>
+              </template>
+              <template v-else-if="this.contestID && !OIContestRealTimePermission">
+                <Alert type="success" show-icon>提交成功</Alert>
+              </template>
+            </div>
+            <div v-else-if="problem.my_status === 0">
+              <Alert type="success" show-icon>已解决</Alert>
+            </div>
+            <div v-else-if="this.contestID && !OIContestRealTimePermission && submissionExists">
+              <Alert type="success" show-icon>已提交,未解决</Alert>
+            </div>
+            <div v-if="contestEnded">
+              <Alert type="warning" show-icon>竞赛已结束</Alert>
+            </div>
+          </Col>
+
+          <Col :span="12">
+            <template v-if="captchaRequired">
+              <div class="captcha-container">
+                <Tooltip v-if="captchaRequired" content="Click to refresh" placement="top">
+                  <img :src="captchaSrc" @click="getCaptchaSrc"/>
+                </Tooltip>
+                <Input v-model="captchaCode" class="captcha-code"/>
+              </div>
+            </template>
+            <Button type="warning" icon="edit" :loading="submitting" @click="submitCode" :disabled="problemSubmitDisabled"
+                    class="fl-right">
+              <span v-if="!submitting">提交</span>
+              <span v-else>提交中</span>
+            </Button>
+          </Col>
+        </Row>
+      <div slot="footer" style="display: none;"></div>
+    </Modal>
+    <!-- 提交代码弹窗 E -->
+  </Row>
 </template>
 
 <script>
@@ -211,6 +175,7 @@
   import { types } from '../../../../store'
   import CodeMirror from '@oj/components/CodeMirror.vue'
   import storage from '@/utils/storage'
+  import { client } from '@/utils/dom.js'
   import { FormMixin } from '@oj/components/mixins'
   import { JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey } from '@/utils/constants'
   import api from '@oj/api'
@@ -230,6 +195,8 @@
         statusVisible: false,
         captchaRequired: false,
         graphVisible: false,
+        // 代码弹窗变量
+        codeVisible: false,
         submissionExists: false,
         captchaCode: '',
         captchaSrc: '',
@@ -277,6 +244,10 @@
     mounted () {
       this.$store.commit(types.CHANGE_CONTEST_ITEM_VISIBLE, {menu: false})
       this.init()
+      // 固定题目内容 暂时没想到好的方法
+      setTimeout(() => {
+        this.proInfoHeight()
+      }, 1500)
     },
     methods: {
       ...mapActions(['changeDomTitle']),
@@ -386,7 +357,7 @@
       },
       submitCode () {
         if (this.code.trim() === '') {
-          this.$error('Code can not be empty')
+          this.$error('代码不能为空!')
           return
         }
         this.submissionId = ''
@@ -449,10 +420,28 @@
         }
       },
       onCopy (event) {
-        this.$success('Code copied')
+        this.$success('拷贝成功')
       },
       onCopyError (e) {
-        this.$error('Failed to copy code')
+        this.$error('拷贝失败')
+      },
+      proInfoHeight () {
+        let content = this.$refs.problemContent
+        let parent = content.offsetParent
+        let distance = content.offsetTop
+        let winHei = client().height
+        while (parent !== null) {
+          console.log(parent, distance)
+          distance += parent.offsetTop
+          parent = parent.offsetParent
+        }
+        // 66为底部footer的高(包括margin) 40 为panel组件下padding
+        let height = winHei - distance - 66 - 40
+        if (height <= 0) {
+          height = 100
+        }
+        console.log('屏幕:', winHei, '距顶:', distance)
+        content.style.height = height + 'px'
       }
     },
     computed: {
@@ -501,10 +490,8 @@
     margin-left: 8px;
   }
 
-  .flex-container {
+  .problem-wrapper {
     #problem-main {
-      flex: auto;
-      margin-right: 18px;
       .panel-title {
         .info {
           display: flex;
@@ -517,15 +504,16 @@
           }
         }
       }
-    }
-    #right-column {
-      flex: none;
-      width: 220px;
+      & /deep/ .ivu-card-body {
+        padding-top: 0 !important;
+        padding-right: 5px !important;
+      }
     }
   }
 
   #problem-content {
-    margin-top: -50px;
+    overflow: auto;
+    margin-top: 15px;
     .title {
       font-size: 20px;
       font-weight: 400;
@@ -559,7 +547,7 @@
 
   #submit-code {
     margin-top: 20px;
-    margin-bottom: 20px;
+    // margin-bottom: 20px;
     .status {
       float: left;
       span {
@@ -577,26 +565,6 @@
     }
   }
 
-  /*#info {
-    margin-bottom: 20px;
-    margin-top: 20px;
-    ul {
-      list-style-type: none;
-      li {
-        border-bottom: 1px dotted #e9eaec;
-        margin-bottom: 10px;
-        p {
-          display: inline-block;
-        }
-        p:first-child {
-          width: 90px;
-        }
-        p:last-child {
-          float: right;
-        }
-      }
-    }
-  }*/
 
   .fl-right {
     float: right;

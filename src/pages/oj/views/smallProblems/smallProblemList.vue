@@ -42,10 +42,16 @@
       </Panel>
       <Pagination :total="total" :page-size="limit" @on-change="pushRouter" :current.sync="query.page"></Pagination>
     </Col>
+    <modal v-model="smProModal">
+      <div slot="header">{{currentProblem.title}}</div>
+      <sm-problem v-if="smProModal" :content="currentProblem"></sm-problem>
+      <div slot="footer" style="display: none;"></div>
+    </modal>
   </Row>
 </template>
 <script>
   import Pagination from '@oj/components/Pagination'
+  import smProblem from '@oj/views/smallProblems/smallProblem.vue'
   import utils from '@/utils/utils'
   import { client } from '@/utils/dom.js'
   import { ProblemMixin } from '@oj/components/mixins'
@@ -55,7 +61,8 @@
     name: 'smallProblemList',
     mixins: [ProblemMixin],
     components: {
-      Pagination
+      Pagination,
+      smProblem
     },
     data () {
       return {
@@ -72,7 +79,10 @@
                 },
                 on: {
                   click: () => {
-                    this.$router.push({name: 'small-problem-details', params: {problemID: params.row._id}})
+                    // 发送ajax请求获取小题的内容
+                    // 并显示弹窗赋值到变量中
+                    this.smProModal = true
+                    this.currentProblem = {_id: 1, title: '测试', submission_number: '4', accepted_number: '2', tags: [], content: '测试测试 主题内容'}
                   }
                 },
                 style: {
@@ -128,7 +138,7 @@
             }
           }
         ],
-        problemList: [],
+        problemList: [{_id: 1, title: '测试', submission_number: '4', accepted_number: '2', tags: []}],
         query: {
           keyword: '',
           tag: '',
@@ -138,9 +148,12 @@
         limit: 20,
         total: 0,
         loadings: {
-          table: true,
+          table: false,
           tag: true
-        }
+        },
+        // 小题弹窗
+        smProModal: false,
+        currentProblem: {}
       }
     },
     mounted () {
@@ -185,7 +198,7 @@
       getProblemList () {
         // 偏移量
         // let offset = ( this.query.page - 1 ) * this.limit
-        this.loadings.table = true
+        // this.loadings.table = true
         /*  //发送请求
         api.getxxx(offset,this.limit,this,query).then(res => {
           this.loadings.table = false

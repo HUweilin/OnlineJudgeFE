@@ -1,19 +1,19 @@
 <template>
-  <div style="margin: 0px 0px 15px 0px">
+  <div style="margin-bottom: 5px;">
     <Row type="flex" justify="space-between" class="header">
-      <Col :span=10>
+      <Col :xs="24" :sm="12">
       <div>
         <span>语言:</span>
-        <Select :value="language" @on-change="onLangChange" class="adjust">
+        <Select size="small" :value="language" @on-change="onLangChange" class="adjust">
           <Option v-for="item in languages" :key="item" :value="item">{{item}}
           </Option>
         </Select>
       </div>
       </Col>
-      <Col :span=10>
+      <Col :xs="24" :sm="12">
       <div class="fl-right">
         <span>背景:</span>
-        <Select v-model="options.theme" @on-change="onThemeChange" class="adjust">
+        <Select size="small" v-model="options.theme" @on-change="onThemeChange" class="adjust">
           <Option v-for="item in themes" :key="item.label" :value="item.value">{{item.label}}
           </Option>
         </Select>
@@ -74,6 +74,7 @@
           tabSize: 4,
           mode: 'text/x-csrc',
           theme: 'solarized',
+          // 是否显示行号
           lineNumbers: true,
           line: true,
           // 代码折叠
@@ -132,9 +133,7 @@
     .adjust {
       width: 150px;
       margin-left: 10px;
-    }
-    .fl-right {
-      float: right;
+      padding: 5px 0;
     }
   }
 </style>

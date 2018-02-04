@@ -36,6 +36,12 @@
           </li>
         </ul>
       </div>
+      <Table style="width: 100%; font-size: 16px;"
+        :columns="tableColumns"
+        :data="contests"
+        :loading="loading"
+        size="small"
+        disabled-hover></Table>
       <p id="no-contest" v-if="contests.length == 0">暂无竞赛</p>
       <ol id="contest-list">
         <li v-for="contest in contests">
@@ -108,7 +114,58 @@
         contests: [],
         CONTEST_STATUS_REVERSE: CONTEST_STATUS_REVERSE,
 //      for password modal use
-        cur_contest_id: ''
+        cur_contest_id: '',
+        loading: true,
+        tableColumns: [
+          {
+            title: '编号',
+            key: 'id',
+            render: (h, params) => {
+              return h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large'
+                },
+                on: {
+                  click: () => {
+                    // this.$router.push({name: 'contest-details', params: {}})
+                    this.goContest(params.row)
+                  }
+                },
+                style: {
+                  padding: '2px 0'
+                }
+              }, params.row.id)
+            }
+          },
+          {
+            title: '题目',
+            render: (h, params) => {
+              return h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large'
+                },
+                on: {
+                  click: () => {
+                    this.goContest(params.row)
+                  }
+                },
+                style: {
+                  padding: '2px 0'
+                }
+              }, params.row.title)
+            }
+          },
+          {
+            title: '开始时间',
+            render: (h, params) => {
+              console.log(this)
+              // 需要改进!
+              return h('span', this.getLocalTime(params.row.start_time, 'YYYY-M-D HH:mm'))
+            }
+          }
+        ]
       }
     },
     beforeRouteEnter (to, from, next) {
@@ -116,9 +173,13 @@
         next((vm) => {
           vm.contests = res.data.data.results
           vm.total = res.data.data.total
+          vm.loading = false
+          console.log(vm.contests)
         })
       }, (res) => {
-        next()
+        next((vm) => {
+          vm.loading = false
+        })
       })
     },
     methods: {
@@ -135,6 +196,7 @@
         api.getContestList(offset, this.limit, this.query).then((res) => {
           this.contests = res.data.data.results
           this.total = res.data.data.total
+          this.loading = false
         })
       },
       changeRoute () {
@@ -167,6 +229,9 @@
 
       getDuration (startTime, endTime) {
         return time.duration(startTime, endTime)
+      },
+      getLocalTime (startTime, format) {
+        return time.utcToLocal(startTime, format)
       }
     },
     computed: {
@@ -223,6 +288,9 @@
           }
         }
       }
+    }
+    & /deep/ .ivu-btn:focus , .ivu-btn-text:focus {
+      box-shadow: none;
     }
   }
 </style>

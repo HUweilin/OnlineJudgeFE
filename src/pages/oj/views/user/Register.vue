@@ -42,7 +42,7 @@
         @click="handleRegister"
         class="btn" long
         :loading="btnRegisterLoading">
-        Register
+        注册
       </Button>
       <Button
         type="ghost"
@@ -68,7 +68,7 @@
       const CheckUsernameNotExist = (rule, value, callback) => {
         api.checkUsernameOrEmail(value, undefined).then(res => {
           if (res.data.data.username === true) {
-            callback(new Error('The username already exists.'))
+            callback(new Error('该用户名已被占用!'))
           } else {
             callback()
           }
@@ -77,7 +77,7 @@
       const CheckEmailNotExist = (rule, value, callback) => {
         api.checkUsernameOrEmail(undefined, value).then(res => {
           if (res.data.data.email === true) {
-            callback(new Error('The email already exists'))
+            callback(new Error('该邮箱已被注册'))
           } else {
             callback()
           }
@@ -92,8 +92,10 @@
       }
 
       const CheckAgainPassword = (rule, value, callback) => {
-        if (value !== this.formRegister.password) {
-          callback(new Error('password does not match'))
+        if (value === '') {
+          callback(new Error('请再次确认您的密码'))
+        } else if (value !== this.formRegister.password) {
+          callback(new Error('两次密码不一致'))
         }
         callback()
       }
@@ -109,7 +111,7 @@
         },
         ruleRegister: {
           username: [
-            {required: true, trigger: 'blur'},
+            {required: true, message: '用户名不能为空!', trigger: 'blur'},
             {validator: CheckUsernameNotExist, trigger: 'blur'}
           ],
           email: [
@@ -143,7 +145,7 @@
           delete formData['passwordAgain']
           this.btnRegisterLoading = true
           api.register(formData).then(res => {
-            this.$success('Thanks for your registering, you can login now')
+            this.$success('注册成功!可以登录了')
             this.switchMode('login')
             this.btnRegisterLoading = false
           }, _ => {

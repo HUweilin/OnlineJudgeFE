@@ -50,7 +50,7 @@
       <div class="container-fluid">
         <div ref="my-bottom-nav" class="collapse navbar-collapse" id="my-bottom-nav">
           <Menu class="is-show ivu-row" theme="light" mode="horizontal" @on-select="handleRoute" :active-name="activeMenu">
-            <Col :sm="1" :md="3" style="height: inherit"></Col>
+            <Col :sm="3" :md="4" style="height: inherit"></Col>
             <Menu-item name="/" class="ivu-col ivu-col-span-sm-3">
               <Icon type="home"></Icon>
               主页
@@ -66,14 +66,13 @@
               <Menu-item name="/smallProblems">
                 小题训练
               </Menu-item>
+              <Menu-item name="/status">
+                状态
+              </Menu-item>
             </Submenu>
             <Menu-item name="/contests" class="ivu-col ivu-col-span-sm-3">
               <Icon type="trophy"></Icon>
               竞赛
-            </Menu-item>
-            <Menu-item name="/status" class="ivu-col ivu-col-span-sm-4 ivu-col-span-md-3">
-              <Icon type="ios-pulse-strong"></Icon>
-              状态
             </Menu-item>
             <Submenu name="" class="ivu-col ivu-col-span-sm-4 ivu-col-span-md-3">
               <template slot="title">

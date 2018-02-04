@@ -255,29 +255,6 @@
         this.query.page = 1
         this.pushRouter()
       },
-      // handleTagsVisible (value) {
-      //   if (value) {
-      //     this.problemTableColumns.push(
-      //       {
-      //         title: 'Tags',
-      //         align: 'center',
-      //         width: '200px',
-      //         render: (h, params) => {
-      //           let tags = []
-      //           params.row.tags.forEach(tag => {
-      //             tags.push(h('Tag', {}, tag))
-      //           })
-      //           return h('div', {
-      //             style: {
-      //               margin: '8px 0'
-      //             }
-      //           }, tags)
-      //         }
-      //       })
-      //   } else {
-      //     this.problemTableColumns.splice(this.problemTableColumns.length - 1, 1)
-      //   }
-      // },
       onReset () {
         this.$router.push({name: 'problem-list'})
       },
