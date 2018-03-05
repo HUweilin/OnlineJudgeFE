@@ -6,11 +6,11 @@
         <Card :padding="20" class="flex-child">
           <span slot="title" style="line-height: 20px">{{session.ip}}</span>
           <div slot="extra">
-            <Tag v-if="session.current_session" color="green">Current</Tag>
+            <Tag v-if="session.current_session" color="green">当前</Tag>
             <Button v-else
                     type="warning"
                     size="small"
-                    @click="deleteSession(session.session_key)">Revoke
+                    @click="deleteSession(session.session_key)">撤销
             </Button>
           </div>
           <Form :label-width="100">
@@ -123,8 +123,8 @@
       },
       deleteSession (sessionKey) {
         this.$Modal.confirm({
-          title: 'Confirm',
-          content: 'Are you sure to revoke the session?',
+          title: '确认',
+          content: '是否撤销这个session?',
           onOk: () => {
             api.deleteSession(sessionKey).then(res => {
               this.getSessions()
@@ -135,7 +135,7 @@
       },
       closeTFA () {
         this.$Modal.confirm({
-          title: 'Confirm',
+          title: '确定',
           content: 'Two-factor Authentication is a powerful tool to protect your account, are you sure to close it?',
           onOk: () => {
             this.updateTFA(true)

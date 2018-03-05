@@ -19,6 +19,19 @@
               </Dropdown>
             </li>
 
+            <li>
+              <Dropdown @on-click="handleLangChange">
+                <span>{{language}}
+                  <Icon type="arrow-down-b"></Icon>
+                </span>
+                <Dropdown-menu slot="list">
+                  <Dropdown-item name="">All</Dropdown-item>
+                  <Dropdown-item v-for="lang in Object.keys(SUBMISSION_LANGUAGE)" :key="lang" :name="lang">
+                    {{SUBMISSION_LANGUAGE[lang]}}
+                  </Dropdown-item>
+                </Dropdown-menu>
+              </Dropdown>
+            </li>
 
             <li>
               <i-switch size="large" v-model="formFilter.myself" @on-change="handleQueryChange">
@@ -27,11 +40,13 @@
               </i-switch>
             </li>
             <li>
-              <Input v-model="formFilter.username" placeholder="Search Author" @on-enter="handleQueryChange"/>
+              <Input v-model="formFilter.username" placeholder="搜索用户" @on-enter="handleQueryChange"/>
             </li>
-
             <li>
-              <Button type="info" icon="refresh" @click="getSubmissions">Refresh</Button>
+              <Input v-model="problemID" placeholder="题目编号" @on-enter="handleQueryChange"/>
+            </li>
+            <li>
+              <Button type="info" icon="refresh" @click="getSubmissions">刷新</Button>
             </li>
           </ul>
         </div>
@@ -45,7 +60,7 @@
 <script>
   import { mapGetters } from 'vuex'
   import api from '@oj/api'
-  import { JUDGE_STATUS, USER_TYPE } from '@/utils/constants'
+  import { JUDGE_STATUS, USER_TYPE, SUBMISSION_LANGUAGE } from '@/utils/constants'
   import utils from '@/utils/utils'
   import time from '@/utils/time'
   import Pagination from '@/pages/oj/components/Pagination'
@@ -60,18 +75,19 @@
         formFilter: {
           myself: false,
           result: '',
-          username: ''
+          username: '',
+          language: ''
         },
         columns: [
           {
-            title: 'When',
+            title: '时间',
             align: 'center',
             render: (h, params) => {
               return h('span', time.utcToLocal(params.row.create_time))
             }
           },
           {
-            title: 'ID',
+            title: '提交编号',
             align: 'center',
             render: (h, params) => {
               if (params.row.show_link) {
@@ -92,7 +108,7 @@
             }
           },
           {
-            title: 'Status',
+            title: '判题结果',
             align: 'center',
             render: (h, params) => {
               return h('Tag', {
@@ -103,7 +119,7 @@
             }
           },
           {
-            title: 'Problem',
+            title: '题目编号',
             align: 'center',
             render: (h, params) => {
               return h('span',
@@ -114,14 +130,16 @@
                   },
                   on: {
                     click: () => {
-                      if (this.contestID) {
+                      if (this.routeID) {
+                        let pushParams = {problemID: params.row.problem}
+                        pushParams[this.routeParam[1]] = this.route
                         this.$router.push(
                           {
-                            name: 'contest-problem-details',
-                            params: {problemID: params.row.problem, contestID: this.contestID}
+                            name: this.toProblemRouteName,
+                            params: pushParams
                           })
                       } else {
-                        this.$router.push({name: 'problem-details', params: {problemID: params.row.problem}})
+                        this.$router.push({name: this.toProblemRouteName, params: {problemID: params.row.problem}})
                       }
                     }
                   }
@@ -130,26 +148,38 @@
             }
           },
           {
-            title: 'Time',
+            title: '运行时间',
             align: 'center',
             render: (h, params) => {
-              return h('span', utils.submissionTimeFormat(params.row.statistic_info.time_cost))
+              let info
+              if (params.row.statistic_info) {
+                info = utils.submissionTimeFormat(params.row.statistic_info.time_cost)
+              } else {
+                info = '--'
+              }
+              return h('span', info)
             }
           },
           {
-            title: 'Memory',
+            title: '运行内存',
             align: 'center',
             render: (h, params) => {
-              return h('span', utils.submissionMemoryFormat(params.row.statistic_info.memory_cost))
+              let info
+              if (params.row.statistic_info) {
+                info = utils.submissionMemoryFormat(params.row.statistic_info.memory_cost)
+              } else {
+                info = '--'
+              }
+              return h('span', info)
             }
           },
           {
-            title: 'Language',
+            title: '语言',
             align: 'center',
             key: 'language'
           },
           {
-            title: 'Author',
+            title: '用户',
             align: 'center',
             render: (h, params) => {
               return h('a', {
@@ -175,11 +205,16 @@
         total: 30,
         limit: 12,
         page: 1,
-        contestID: '',
         problemID: '',
         routeName: '',
         JUDGE_STATUS: '',
-        rejudge_column: false
+        rejudge_column: false,
+        SUBMISSION_LANGUAGE: '',
+        routeParam: [],
+        routeID: '',
+        func: '',
+        toRouteName: '',
+        toProblemRouteName: ''
       }
     },
     mounted () {
@@ -188,10 +223,13 @@
       // 去除submitting的状态 和 两个
       delete this.JUDGE_STATUS['9']
       delete this.JUDGE_STATUS['2']
+      this.SUBMISSION_LANGUAGE = Object.assign({}, SUBMISSION_LANGUAGE)
     },
     methods: {
       init () {
-        this.contestID = this.$route.params.contestID
+        // 编号 若不是竞赛测验页面跳转的 则值为空
+        this.getRouteID()
+        // 当前路由带的参数(问号?后的)
         let query = this.$route.query
         this.problemID = query.problemID
         this.formFilter.myself = query.myself === '1'
@@ -209,17 +247,21 @@
           myself: this.formFilter.myself === true ? '1' : '0',
           result: this.formFilter.result,
           username: this.formFilter.username,
-          page: this.page
+          page: this.page,
+          language: this.formFilter.language
         }
       },
       getSubmissions () {
+        // 获取当前的参数
         let params = this.buildQuery()
-        params.contest_id = this.contestID
+        // routeID存在则证明是在竞赛或者测验作业界面
+        if (this.routeID) {
+          params[this.routeParam[1]] = this.routeID
+        }
         params.problem_id = this.problemID
         let offset = (this.page - 1) * this.limit
-        let func = this.contestID ? 'getContestSubmissionList' : 'getSubmissionList'
         this.loadingTable = true
-        api[func](offset, this.limit, params).then(res => {
+        api[this.func](offset, this.limit, params).then(res => {
           let data = res.data.data
           for (let v of data.results) {
             v.loading = false
@@ -235,11 +277,12 @@
       // 改变route， 通过监听route变化请求数据，这样可以产生route history， 用户返回时就会保存之前的状态
       changeRoute () {
         let query = utils.filterEmptyValue(this.buildQuery())
-        query.contestID = this.contestID
+        if (this.routeID) {
+          query[this.routeParam[0]] = this.routeID
+        }
         query.problemID = this.problemID
-        let routeName = query.contestID ? 'contest-submission-list' : 'submission-list'
         this.$router.push({
-          name: routeName,
+          name: this.toRouteName,
           query: utils.filterEmptyValue(query)
         })
       },
@@ -247,9 +290,11 @@
         this.$router.push(route)
       },
       adjustRejudgeColumn () {
+        // 是竞赛 或者 非竞赛且用户不是超级用户 或者xxx 直接return
         if (!this.rejudgeColumnVisible || this.rejudge_column) {
           return
         }
+        // 非竞赛且是超级管理员 或者xxx
         const judgeColumn = {
           title: 'Option',
           fixed: 'right',
@@ -278,6 +323,11 @@
         this.formFilter.result = status
         this.changeRoute()
       },
+      handleLangChange (language) {
+        this.page = 1
+        this.formFilter.language = language
+        this.changeRoute()
+      },
       handleQueryChange () {
         this.page = 1
         this.changeRoute()
@@ -291,24 +341,58 @@
         }, () => {
           this.submissions[index].loading = false
         })
+      },
+      getRouteID () {
+        if (this.$route.params.contestID) {
+          this.routeParam = ['contestID', 'contest_id']
+          this.routeID = this.$route.params.contestID
+          this.func = 'getContestSubmissionList'
+          this.toRouteName = 'contest-submission-list'
+          this.toProblemRouteName = 'contest-problem-details'
+        } else if (this.$route.params.testID) {
+          this.routeParam = ['testID', 'test_id']
+          this.routeID = this.$route.params.testID
+          this.func = 'getTestSubmissionList'
+          this.toRouteName = 'test-submission-list'
+          this.toProblemRouteName = 'test-problem-details'
+        } else if (this.$route.params.homeworkID) {
+          this.routeParam = ['homeworkID', 'homework_id']
+          this.routeID = this.$route.params.homeworkID
+          this.func = 'getHomeworkSubmissionList'
+          this.toRouteName = 'homework-submission-list'
+          this.toProblemRouteName = 'homework-problem-details'
+        } else {
+          this.routeParam = []
+          this.routeID = ''
+          this.func = 'getSubmissionList'
+          this.toRouteName = 'submission-list'
+          this.toProblemRouteName = 'problem-details'
+        }
       }
     },
     computed: {
       ...mapGetters(['isAuthenticated', 'user']),
       title () {
-        if (!this.contestID) {
-          return 'Status'
+        if (!this.routeID) {
+          return '提交状态'
         } else if (this.problemID) {
-          return 'Problem Submissions'
-        } else {
-          return 'Submissions'
+          return '题目提交情况'
+        } else if (this.routeParam[0] === 'contestID') {
+          return '竞赛提交状态'
+        } else if (this.routeParam[0] === 'testID') {
+          return '训练提交状态'
+        } else if (this.routeParam[0] === 'homeworkID') {
+          return '作业提交状态'
         }
       },
       status () {
-        return this.formFilter.result === '' ? 'Status' : JUDGE_STATUS[this.formFilter.result].name
+        return this.formFilter.result === '' ? '状态' : JUDGE_STATUS[this.formFilter.result].name
+      },
+      language () {
+        return this.formFilter.language === '' ? '语言' : SUBMISSION_LANGUAGE[this.formFilter.language]
       },
       rejudgeColumnVisible () {
-        return !this.contestID && this.user.admin_type === USER_TYPE.SUPER_ADMIN
+        return (!this.routeID) && this.user.admin_type === USER_TYPE.SUPER_ADMIN
       }
     },
     watch: {

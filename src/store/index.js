@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import user from './modules/user'
 import contest from './modules/contest'
+import examination from './modules/examination'
 import api from '@oj/api'
 import types from './types'
 
@@ -49,20 +50,21 @@ const rootActions = {
   },
   changeModalStatus ({commit}, payload) {
     commit(types.CHANGE_MODAL_STATUS, payload)
-  },
-  changeDomTitle ({commit, state}, payload) {
-    if (payload && payload.title) {
-      window.document.title = state.website.website_name_shortcut + ' | ' + payload.title
-    } else {
-      window.document.title = state.website.website_name_shortcut + ' | ' + state.route.meta.title
-    }
   }
+  // changeDomTitle ({commit, state}, payload) {
+  //   if (payload && payload.title) {
+  //     window.document.title = state.website.website_name_shortcut + ' | ' + payload.title
+  //   } else {
+  //     window.document.title = state.website.website_name_shortcut + ' | ' + state.route.meta.title
+  //   }
+  // }
 }
 
 export default new Vuex.Store({
   modules: {
     user,
-    contest
+    contest,
+    examination
   },
   state: rootState,
   getters: rootGetters,

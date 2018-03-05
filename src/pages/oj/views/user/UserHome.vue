@@ -16,29 +16,29 @@
 
         <div class="flex-container">
           <div class="left">
-            <p>Solved</p>
+            <p>已解决</p>
             <p class="emphasis">{{profile.accepted_number}}</p>
           </div>
           <div class="middle">
-            <p>Submissions</p>
+            <p>提交次数</p>
             <p class="emphasis">{{profile.submission_number}}</p>
           </div>
           <div class="right">
-            <p>Score</p>
+            <p>分数</p>
             <p class="emphasis">{{profile.total_score}}</p>
           </div>
         </div>
         <div id="problems">
-          <div v-if="problems.length">List of solved problems
+          <div v-if="problems.length">已解决列表
             <Poptip v-if="refreshVisible" trigger="hover" placement="right-start">
               <Icon type="ios-help-outline"></Icon>
               <div slot="content">
-                <p>If you find the following problem id does not exist,<br> try to click the button.</p>
-                <Button type="info" @click="freshProblemDisplayID">regenerate</Button>
+                <p>找不到某个已解决的问题???<br> 点击更新试试~.</p>
+                <Button type="info" @click="freshProblemDisplayID">更新</Button>
               </div>
             </Poptip>
           </div>
-          <p v-else>The guy is so lazy that has not solved any problem yet.</p>
+          <p v-else>这个人很懒~. 什么问题都没解决~</p>
           <div class="btns">
             <div class="problem-btn" v-for="problemID in problems">
               <Button type="ghost" @click="goProblem(problemID)">{{problemID}}</Button>
@@ -61,7 +61,6 @@
   </div>
 </template>
 <script>
-  import { mapActions } from 'vuex'
   import time from '@/utils/time'
   import api from '@oj/api'
 
@@ -77,11 +76,9 @@
       this.init()
     },
     methods: {
-      ...mapActions(['changeDomTitle']),
       init () {
         this.username = this.$route.query.username
         api.getUserInfo(this.username).then(res => {
-          this.changeDomTitle({title: res.data.data.user.username})
           this.profile = res.data.data
           this.getSolvedProblems()
           let registerTime = time.utcToLocal(this.profile.user.create_time, 'YYYY-MM-D')

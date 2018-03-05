@@ -1,6 +1,6 @@
 <template>
   <div class="setting-main">
-    <div class="section-title">Avatar Setting</div>
+    <div class="section-title">头像设置</div>
     <template v-if="!avatarOption.imgSrc">
       <Upload type="drag"
               class="mini-container"
@@ -9,7 +9,7 @@
               :before-upload="handleSelectFile">
         <div style="padding: 30px 0">
           <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
-          <p>Drop  here, or click to select manually</p>
+          <p>拖拽图片到这里,或者点击这里手动上传</p>
         </div>
       </Upload>
     </template>
@@ -52,36 +52,36 @@
       </div>
     </template>
     <Modal v-model="uploadModalVisible"
-           title="Upload the avatar">
+           title="上传头像">
       <div class="upload-modal">
-        <p class="notice">Your avatar will be set to:</p>
+        <p class="notice">您的头像:</p>
         <img :src="uploadImgSrc"/>
       </div>
       <div slot="footer">
-        <Button @click="uploadAvatar" :loading="loadingUploadBtn">upload</Button>
+        <Button @click="uploadAvatar" :loading="loadingUploadBtn">上传</Button>
       </div>
     </Modal>
 
-    <div class="section-title">Profile Setting</div>
+    <div class="section-title">信息设置</div>
     <Form ref="formProfile" :model="formProfile">
       <Row type="flex" :gutter="30" justify="space-around">
         <Col :span="11">
-        <FormItem label="Real Name">
+        <FormItem label="真实姓名">
           <Input v-model="formProfile.real_name"/>
         </FormItem>
-        <Form-item label="School">
+        <Form-item label="学校">
           <Input v-model="formProfile.school"/>
         </Form-item>
-        <Form-item label="Major">
+        <Form-item label="专业">
           <Input v-model="formProfile.major"/>
         </Form-item>
         <Form-item>
-          <Button type="primary" @click="updateProfile" :loading="loadingSaveBtn">Save All</Button>
+          <Button type="primary" @click="updateProfile" :loading="loadingSaveBtn">保存</Button>
         </Form-item>
         </Col>
 
         <Col :span="11">
-        <Form-item label="Mood">
+        <Form-item label="个性签名">
           <Input v-model="formProfile.mood"/>
         </Form-item>
         <Form-item label="Blog">
@@ -140,8 +140,8 @@
       checkFileType (file) {
         if (!/\.(gif|jpg|jpeg|png|bmp|GIF|JPG|PNG)$/.test(file.name)) {
           this.$Notice.warning({
-            title: 'File type not support',
-            desc: 'The format of ' + file.name + ' is incorrect ，please choose image only.'
+            title: '不支持该文件类型',
+            desc: file.name + ' 的格式错误，请重新选择图片上传.'
           })
           return false
         }
@@ -151,8 +151,8 @@
         // max size is 2MB
         if (file.size > 2 * 1024 * 1024) {
           this.$Notice.warning({
-            title: 'Exceed max size limit',
-            desc: 'File ' + file.name + ' is too big, you can upload a image up to 2MB in size'
+            title: '文件大小超过限制',
+            desc: '文件 ' + file.name + ' 太大, 请选择大小在2MB内的图片'
           })
           return false
         }
@@ -182,7 +182,7 @@
       },
       reselect () {
         this.$Modal.confirm({
-          content: 'Are you sure to disgard the changes?',
+          content: '是否放弃操作?',
           onOk: () => {
             this.avatarOption.imgSrc = ''
           }
@@ -207,7 +207,7 @@
             headers: {'content-type': 'multipart/form-data'}
           }).then(res => {
             this.loadingUploadBtn = false
-            this.$success('Successfully set new avatar')
+            this.$success('头像上传成功')
             this.uploadModalVisible = false
             this.avatarOption.imgSrc = ''
             this.$store.dispatch('getProfile')

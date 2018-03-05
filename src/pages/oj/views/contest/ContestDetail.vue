@@ -21,9 +21,9 @@
               <div v-html="contest.description" class="markdown-body"></div>
               <div v-if="passwordFormVisible" class="contest-password">
                 <Input v-model="contestPassword" type="password"
-                       placeholder="contest password" class="contest-password-input"
+                       placeholder="竞赛密码" class="contest-password-input" 
                        @on-enter="checkPassword"/>
-                <Button type="info" @click="checkPassword">Enter</Button>
+                <Button type="info" @click="checkPassword" :loading="btnLoading">进入</Button>
               </div>
             </Panel>
             <Table :columns="columns" :data="contest_table" disabled-hover style="margin-bottom: 40px;"></Table>
@@ -37,32 +37,32 @@
         <VerticalMenu-item :disabled="contestMenuDisabled"
                            :route="{name: 'contest-problem-list', params: {contestID: contestID}}">
           <Icon type="ios-photos"></Icon>
-          Problems
+          题目
         </VerticalMenu-item>
 
         <VerticalMenu-item :disabled="contestMenuDisabled"
                            :route="{name: 'contest-announcement-list', params: {contestID: contestID}}">
           <Icon type="chatbubble-working"></Icon>
-          Announcements
+          竞赛公告
         </VerticalMenu-item>
 
         <VerticalMenu-item v-if="OIContestRealTimePermission"
                            :disabled="contestMenuDisabled"
                            :route="{name: 'contest-submission-list'}">
           <Icon type="navicon-round"></Icon>
-          Submissions
+          提交状态
         </VerticalMenu-item>
 
         <VerticalMenu-item v-if="OIContestRealTimePermission"
                            :disabled="contestMenuDisabled"
                            :route="{name: 'contest-rank', params: {contestID: contestID}}">
           <Icon type="stats-bars"></Icon>
-          Rankings
+          排行榜
         </VerticalMenu-item>
 
         <VerticalMenu-item :route="{name: 'contest-details', params: {contestID: contestID}}">
           <Icon type="home"></Icon>
-          Overview
+          主页
         </VerticalMenu-item>
 
         <VerticalMenu-item v-if="showAdminHelper"
@@ -78,7 +78,7 @@
 <script>
   import moment from 'moment'
   import api from '@oj/api'
-  import { mapState, mapGetters, mapActions } from 'vuex'
+  import { mapState, mapGetters } from 'vuex'
   import { types } from '@/store'
   import { CONTEST_STATUS_REVERSE, CONTEST_STATUS } from '@/utils/constants'
   import time from '@/utils/time'
@@ -95,27 +95,27 @@
         contestPassword: '',
         columns: [
           {
-            title: 'StartAt',
+            title: '开始时间',
             render: (h, params) => {
               return h('span', time.utcToLocal(params.row.start_time))
             }
           },
           {
-            title: 'EndAt',
+            title: '结束时间',
             render: (h, params) => {
               return h('span', time.utcToLocal(params.row.end_time))
             }
           },
           {
-            title: 'ContestType',
+            title: '类型',
             key: 'contest_type'
           },
           {
-            title: 'Rule',
+            title: '规则',
             key: 'rule_type'
           },
           {
-            title: 'Creator',
+            title: '创建者',
             render: (h, data) => {
               return h('span', data.row.created_by.username)
             }
@@ -126,10 +126,11 @@
     mounted () {
       this.contestID = this.$route.params.contestID
       this.route_name = this.$route.name
+      // 里层的请求已经将路由携带的参数(竞赛ID)传递过去了
       this.$store.dispatch('getContest').then(res => {
-        this.changeDomTitle({title: res.data.data.title})
         let data = res.data.data
         let endTime = moment(data.end_time)
+        // 如果结束时间未到 则每秒加1 好计算剩余时间
         if (endTime.isAfter(moment(data.now))) {
           this.timer = setInterval(() => {
             this.$store.commit(types.NOW_ADD_1S)
@@ -138,18 +139,17 @@
       })
     },
     methods: {
-      ...mapActions(['changeDomTitle']),
       handleRoute (route) {
         this.$router.push(route)
       },
       checkPassword () {
         if (this.contestPassword === '') {
-          this.$error('Password can\'t be empty')
+          this.$error('密码不能为空!')
           return
         }
         this.btnLoading = true
         api.checkContestPassword(this.contestID, this.contestPassword).then((res) => {
-          this.$success('Succeeded')
+          this.$success('正确')
           this.$store.commit(types.CONTEST_ACCESS, {access: true})
           this.btnLoading = false
         }, (res) => {
@@ -181,7 +181,6 @@
       '$route' (newVal) {
         this.route_name = newVal.name
         this.contestID = newVal.params.contestID
-        this.changeDomTitle({title: this.contest.title})
       }
     },
     beforeDestroy () {

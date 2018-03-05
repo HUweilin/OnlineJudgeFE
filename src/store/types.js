@@ -22,5 +22,12 @@ export default keyMirror({
   'CHANGE_RANK_FORCE_UPDATE': null,
   'CHANGE_CONTEST_RANK_LIMIT': null,
   'CONTEST_ACCESS': null,
-  'CLEAR_CONTEST': null
+  'CLEAR_CONTEST': null,
+
+  // 'EXAM_NOW': null,
+  'EXAMINATION_ACCESS': null,
+  'CHANGE_EXAMINATION': null,
+  'CLEAR_EXAMINATION': null,
+  'CHANGE_EXAMINATION_PROBLEMS': null,
+  'CHANGE_EXAMINATION_ITEM_VISIBLE': null
 })

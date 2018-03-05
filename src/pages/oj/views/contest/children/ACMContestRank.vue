@@ -32,8 +32,13 @@
     <div v-show="showChart" class="echarts">
       <ECharts :options="options" ref="chart" auto-resize></ECharts>
     </div>
+    <div class="box">
+      <span class="first-ac"></span><span class="text">一次通过</span>
+      <span class="accept"></span><span class="text">通过</span>
+      <span class="wrong"></span><span class="text">未通过</span>
+    </div>
     <Table ref="tableRank" class="auto-resize" :columns="columns" :data="dataRank" disabled-hover></Table>
-    <Pagination :total="total"
+    <Pagination :total="total" width="100%"
                 :page-size.sync="limit"
                 :current.sync="page"
                 @on-change="getContestRankData"
@@ -63,6 +68,7 @@
         contestID: '',
         columns: [
           {
+            title: '排名',
             align: 'center',
             width: 60,
             render: (h, params) => {
@@ -70,7 +76,7 @@
             }
           },
           {
-            title: 'User',
+            title: '用户',
             align: 'center',
             render: (h, params) => {
               return h('a', {
@@ -91,9 +97,8 @@
             }
           },
           {
-            title: 'AC / Total',
+            title: '通过率',
             align: 'center',
-            width: 100,
             render: (h, params) => {
               return h('span', {}, [
                 h('span', {}, params.row.accepted_number + ' / '),
@@ -244,6 +249,7 @@
           let info = rank.submission_info
           let cellClass = {}
           Object.keys(info).forEach(problemID => {
+            // info[problem] 也是一个对象
             dataRank[i][problemID] = info[problemID]
             dataRank[i][problemID].ac_time = time.secondFormat(dataRank[i][problemID].ac_time)
             let status = info[problemID]
@@ -255,12 +261,14 @@
               cellClass[problemID] = 'wa'
             }
           })
+          // cellClassName用来设置单元格颜色
+          // 详见https://www.iviewui.com/components/table
           dataRank[i].cellClassName = cellClass
         })
         this.dataRank = dataRank
       },
       addTableColumns (problems) {
-        // 根据题目添加table column
+        // 根据题目添加table column 注：将每个题目作为一列
         problems.forEach(problem => {
           this.columns.push({
             align: 'center',
@@ -326,6 +334,31 @@
       span {
         margin-left: 8px;
       }
+    }
+  }
+  .box {
+    font-size: 0;
+    text-align: center;
+    margin-bottom: 5px;
+    .first-ac, .accept, .wrong {
+      display: inline-block;
+      width: 30px;
+      height: 15px;
+      line-height: 15px;
+      margin: 0 10px;
+      vertical-align: top;
+    }
+    .text {
+      font-size: 12px;
+    }
+    .first-ac {
+      background-color: #33CC99;
+    }
+    .accept {
+      background-color: #dff0d8;
+    }
+    .wrong {
+      background-color: #f2dede;
     }
   }
 </style>

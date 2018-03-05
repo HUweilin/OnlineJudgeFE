@@ -14,13 +14,12 @@
                   <Tag v-for="tag in problem.tags" :key="tag">{{tag}}</Tag>
                 </div>
               </Poptip>
-            <div class="single-info"><Button type="primary" @click="codeVisible=!codeVisible" icon="compose" :disabled="problemSubmitDisabled">提交</Button></div>
+            <div class="single-info"><Button type="primary" @click="codeVisible=!codeVisible" icon="compose" :disabled="examProblemSubmitDisabled">提交</Button></div>
             </div>
             <div class="info">
               <span class="single-info">时间限制(ms):&nbsp;{{problem.time_limit}}</span>
               <span class="single-info">空间限制(kb):&nbsp;{{problem.memory_limit}}</span>
-              <span class="single-info">提交数:&nbsp;{{problem.submission_number}}</span>
-              <span class="single-info">通过数:&nbsp;{{problem.accepted_number}}</span>
+              <span class="single-info" style="text-align: left;">提交数:&nbsp;{{problem.submission_number || 0}}&nbsp;&nbsp;通过数:&nbsp;{{problem.accepted_number || 0}}</span>
             </div>
           </div>
           <div id="problem-content" ref="problemContent" class="markdown-body">
@@ -73,55 +72,27 @@
     <Col :xs="24" :sm="4">
       <div id="right-column">
         <VerticalMenu @on-click="handleRoute">
-        <!-- 如果非竞赛跳转过来 则不显示题目和竞赛公告 -->
-          <template v-if="this.contestID">
-            <VerticalMenu-item :route="{name: 'contest-problem-list', params: {contestID: contestID}}">
+            <VerticalMenu-item :route="getMenuRoute('problem')">
               <Icon type="ios-photos"></Icon>
               题目
             </VerticalMenu-item>
 
-            <VerticalMenu-item :route="{name: 'contest-announcement-list', params: {contestID: contestID}}">
-              <Icon type="chatbubble-working"></Icon>
-              竞赛公告
-            </VerticalMenu-item>
-          </template>
-          <!-- 1、如果不是竞赛 或者 是比赛类型为ACM或比赛状态为ENDED(-1) 2、是管理员 -->
-          <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission" :route="submissionRoute">
+          <VerticalMenu-item :route="getMenuRoute('submission')">
             <Icon type="navicon-round"></Icon>
             提交情况
           </VerticalMenu-item>
 
-          <template v-if="this.contestID">
-            <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission"
-                               :route="{name: 'contest-rank', params: {contestID: contestID}}">
+            <VerticalMenu-item :route="getMenuRoute('rank')">
               <Icon type="stats-bars"></Icon>
               排行榜
             </VerticalMenu-item>
-            <VerticalMenu-item :route="{name: 'contest-details', params: {contestID: contestID}}">
+            <VerticalMenu-item :route="getMenuRoute('details')">
               <Icon type="home"></Icon>
-              竞赛主页
+              主页
             </VerticalMenu-item>
-          </template>
         </VerticalMenu>
-
-        <Card style="margin-top: 5px;" id="pieChart" :padding="0" v-if="!this.contestID || OIContestRealTimePermission">
-          <div slot="title">
-            <Icon type="ios-analytics"></Icon>
-            <span class="card-title">统计</span>
-            <Button type="ghost" size="small" id="detail" @click="graphVisible = !graphVisible">详情</Button>
-          </div>
-        </Card>
       </div>
     </Col>
-    <!-- 通过比例弹窗 -->
-    <Modal v-model="graphVisible">
-      <div id="pieChart-detail">
-        <ECharts :options="largePie" :initOptions="largePieInitOpts"></ECharts>
-      </div>
-      <div slot="footer">
-        <Button type="ghost" @click="graphVisible=false">关闭</Button>
-      </div>
-    </Modal>
     <!-- 提交代码弹窗 B -->
     <Modal v-model="codeVisible" transfer="false" width="1000px">
         <CodeMirror :value.sync="code" @changeLang="onChangeLang" :languages="problem.languages" :language="language" 
@@ -129,23 +100,19 @@
         <Row type="flex" justify="space-between">
           <Col :span="10">
             <div class="status" v-if="statusVisible">
-              <template v-if="!this.contestID || (this.contestID && OIContestRealTimePermission)">
                 <span>状态:</span>
                 <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
                   {{submissionStatus.text}}
                 </Tag>
-              </template>
-              <template v-else-if="this.contestID && !OIContestRealTimePermission">
-                <Alert type="success" show-icon>提交成功</Alert>
-              </template>
+                <!-- <Alert type="success" show-icon>提交成功</Alert> -->
             </div>
             <div v-else-if="problem.my_status === 0">
               <Alert type="success" show-icon>已解决</Alert>
             </div>
-            <div v-else-if="this.contestID && !OIContestRealTimePermission && submissionExists">
+            <div v-else-if="submissionExists">
               <Alert type="success" show-icon>已提交,未解决</Alert>
             </div>
-            <div v-if="contestEnded">
+            <div v-if="examEnded">
               <Alert type="warning" show-icon>竞赛已结束</Alert>
             </div>
           </Col>
@@ -159,7 +126,7 @@
                 <Input v-model="captchaCode" class="captcha-code"/>
               </div>
             </template>
-            <Button type="warning" icon="edit" :loading="submitting" @click="submitCode" :disabled="problemSubmitDisabled"
+            <Button type="warning" icon="edit" :loading="submitting" @click="submitCode" :disabled="examProblemSubmitDisabled"
                     class="fl-right">
               <span v-if="!submitting">提交</span>
               <span v-else>提交中</span>
@@ -174,17 +141,13 @@
 
 <script>
   import { mapGetters } from 'vuex'
-  import { types } from '../../../../store'
+  import { types } from '@/store'
   import CodeMirror from '@oj/components/CodeMirror.vue'
   import storage from '@/utils/storage'
   import { client } from '@/utils/dom.js'
   import { FormMixin } from '@oj/components/mixins'
-  import { JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey } from '@/utils/constants'
+  import { JUDGE_STATUS, EXAMINATION_STATUS, buildTestProblemCodeKey, buildHomeworkProblemCodeKey } from '@/utils/constants'
   import api from '@oj/api'
-  import { pie, largePie } from './chartData'
-
-  // 只显示这些状态的图形占用
-  const filtedStatus = ['-1', '-2', '0', '1', '2', '3', '4', '8']
 
   export default {
     name: 'Problem',
@@ -196,13 +159,12 @@
       return {
         statusVisible: false,
         captchaRequired: false,
-        graphVisible: false,
         // 代码弹窗变量
         codeVisible: false,
         submissionExists: false,
         captchaCode: '',
         captchaSrc: '',
-        contestID: '',
+        examID: '',
         problemID: '',
         submitting: false,
         code: '',
@@ -223,17 +185,19 @@
           },
           tags: []
         },
-        pie: pie,
-        largePie: largePie,
-        // echarts 无法获取隐藏dom的大小，需手动指定
-        largePieInitOpts: {
-          width: '500',
-          height: '480'
-        }
+        func: '',
+        routeParam: ''
       }
     },
     beforeRouteEnter (to, from, next) {
-      let problemCode = storage.get(buildProblemCodeKey(to.params.problemID, to.params.contestID))
+      let id, problemCode
+      if (to.params.testID) {
+        id = to.params.testID
+        problemCode = storage.get(buildTestProblemCodeKey(to.params.problemID, id))
+      } else if (to.params.homeworkID) {
+        id = to.params.homeworkID
+        problemCode = storage.get(buildHomeworkProblemCodeKey(to.params.problemID, id))
+      }
       if (problemCode) {
         next(vm => {
           vm.language = problemCode.language
@@ -244,9 +208,8 @@
       }
     },
     mounted () {
-      // 竞赛界面右侧有菜单栏 若进入竞赛某个题目界面会复用problem
-      // 所以要隐藏竞赛界面的菜单栏
-      this.$store.commit(types.CHANGE_CONTEST_ITEM_VISIBLE, {menu: false})
+      // 要隐藏原本界面的菜单栏
+      this.$store.commit(types.CHANGE_EXAMINATION_ITEM_VISIBLE, {menu: false})
       this.init()
       // 固定题目内容 暂时没想到好的方法
       setTimeout(() => {
@@ -256,10 +219,9 @@
     methods: {
       init () {
         this.$Loading.start()
-        this.contestID = this.$route.params.contestID
-        this.problemID = this.$route.params.problemID
-        let func = this.$route.name === 'problem-details' ? 'getProblem' : 'getContestProblem'
-        api[func](this.problemID, this.contestID).then(res => {
+        // 获取路由中的params 赋值到变量中
+        this.setExamData()
+        api[this.func](this.problemID, this.examID).then(res => {
           this.$Loading.finish()
           this.$nextTick(() => {
             if (window.MathJax) {
@@ -267,12 +229,12 @@
             }
           })
           let problem = res.data.data
+          // 什么作用?
           api.submissionExists(problem.id).then(res => {
             this.submissionExists = res.data.data
           })
           problem.languages = problem.languages.sort()
           this.problem = problem
-          this.changePie(problem)
 
           // 在beforeRouteEnter中修改了, 说明本地有code， 无需加载template
           if (this.language !== 'C++' || this.code !== '' || this.problem.languages.indexOf(this.language) !== -1) {
@@ -286,42 +248,6 @@
         }, () => {
           this.$Loading.error()
         })
-      },
-      changePie (problemData) {
-        // 只显示特定的一些状态
-        for (let k in problemData.statistic_info) {
-          if (filtedStatus.indexOf(k) === -1) {
-            delete problemData.statistic_info[k]
-          }
-        }
-        let acNum = problemData.accepted_number
-        let data = [
-          {name: 'WA', value: problemData.submission_number - acNum},
-          {name: 'AC', value: acNum}
-        ]
-        this.pie.series[0].data = data
-        // 只把大图的AC selected下，这里需要做一下deepcopy
-        let data2 = JSON.parse(JSON.stringify(data))
-        data2[1].selected = true
-        this.largePie.series[1].data = data2
-
-        // 根据结果设置legend,没有提交过的legend不显示
-        let legend = Object.keys(problemData.statistic_info).map(ele => JUDGE_STATUS[ele].short)
-        if (legend.length === 0) {
-          legend.push('AC', 'WA')
-        }
-        this.largePie.legend.data = legend
-
-        // 把ac的数据提取出来放在最后
-        let acCount = problemData.statistic_info['0']
-        delete problemData.statistic_info['0']
-
-        let largePieData = []
-        Object.keys(problemData.statistic_info).forEach(ele => {
-          largePieData.push({name: JUDGE_STATUS[ele].short, value: problemData.statistic_info[ele]})
-        })
-        largePieData.push({name: 'AC', value: acCount})
-        this.largePie.series[0].data = largePieData
       },
       handleRoute (route) {
         this.$router.push(route)
@@ -365,11 +291,21 @@
         this.submissionId = ''
         this.result = {result: 9}
         this.submitting = true
-        let data = {
-          problem_id: this.problem.id,
-          language: this.language,
-          code: this.code,
-          contest_id: this.contestID
+        let data
+        if (this.routeParam === 'testID') {
+          data = {
+            problem_id: this.problem.id,
+            language: this.language,
+            code: this.code,
+            test_id: this.examID
+          }
+        } else if (this.routeParam === 'homeworkID') {
+          data = {
+            problem_id: this.problem.id,
+            language: this.language,
+            code: this.code,
+            homework_id: this.examID
+          }
         }
         if (this.captchaRequired) {
           data.captcha = this.captchaCode
@@ -398,27 +334,23 @@
             this.statusVisible = false
           })
         }
-
-        if (this.contestRuleType === 'OI' && !this.OIContestRealTimePermission) {
-          if (this.submissionExists) {
-            this.$Modal.confirm({
-              title: '',
-              content: '<h3>You have submission in this problem, sure to cover it?<h3>',
-              onOk: () => {
-                // 暂时解决对话框与后面提示对话框冲突的问题(否则一闪而过）
-                setTimeout(() => {
-                  submitFunc(data, false)
-                }, 1000)
-              },
-              onCancel: () => {
-                this.submitting = false
-              }
-            })
-          } else {
-            submitFunc(data, false)
-          }
+        // 以下省略一个判断 不清楚是否有误 需要跟后台联调
+        if (this.submissionExists) {
+          this.$Modal.confirm({
+            title: '',
+            content: '<h3>你已经提交过该问题，是否覆盖？<h3>',
+            onOk: () => {
+              // 暂时解决对话框与后面提示对话框冲突的问题(否则一闪而过）
+              setTimeout(() => {
+                submitFunc(data, false)
+              }, 1000)
+            },
+            onCancel: () => {
+              this.submitting = false
+            }
+          })
         } else {
-          submitFunc(data, true)
+          submitFunc(data, false)
         }
       },
       onCopy (event) {
@@ -444,15 +376,49 @@
         }
         // console.log('屏幕:', winHei, '距顶:', distance)
         content.style.height = height + 'px'
+      },
+      // 根据路由中的params进行赋值
+      setExamData () {
+        this.problemID = this.$route.params.problemID
+        if (this.$route.params.testID !== '' || this.$route.params.testID !== undefined) {
+          this.routeParam = 'testID'
+          this.examID = this.$route.params.testID
+          this.func = 'getTestProblem'
+        } else if (this.$route.params.homeworkID !== '' || this.$route.params.homeworkID !== undefined) {
+          this.routeParam = 'homeworkID'
+          this.examID = this.$route.params.homeworkID
+          this.func = 'getHomeworkProblem'
+        } else {
+          this.routeParam = ''
+          this.examID = ''
+          this.func = ''
+        }
+      },
+      // 菜单栏跳转的路由
+      getMenuRoute (field) {
+        let url
+        let route = {params: {}}
+        route.params[this.routeParam] = this.examID
+        if (this.routeParam === 'testID') {
+          url = 'test-'
+        } else if (this.routeParam === 'homeworkID') {
+          url = 'homework-'
+        }
+        url += field
+        if (field !== 'rank') {
+          url += '-list'
+          if (field === 'submission') {
+            route.query = {problemID: this.problemID}
+          }
+        }
+        route.name = url
+        return route
       }
     },
     computed: {
-      ...mapGetters(['problemSubmitDisabled', 'contestRuleType', 'OIContestRealTimePermission', 'contestStatus']),
-      contest () {
-        return this.$store.state.contest.contest
-      },
-      contestEnded () {
-        return this.contestStatus === CONTEST_STATUS.ENDED
+      ...mapGetters(['examProblemSubmitDisabled', 'examinationStatus']),
+      examEnded () {
+        return this.examinationStatus === EXAMINATION_STATUS.ENDED
       },
       submissionStatus () {
         return {
@@ -473,11 +439,18 @@
       // 防止切换组件后仍然不断请求
       clearInterval(this.refreshStatus)
 
-      this.$store.commit(types.CHANGE_CONTEST_ITEM_VISIBLE, {menu: true})
-      storage.set(buildProblemCodeKey(this.problem._id, from.params.contestID), {
-        code: this.code,
-        language: this.language
-      })
+      this.$store.commit(types.CHANGE_EXAMINATION_ITEM_VISIBLE, {menu: true})
+      if (from.params.testID) {
+        storage.set(buildTestProblemCodeKey(this.problem._id, from.params.testID), {
+          code: this.code,
+          language: this.language
+        })
+      } else if (from.params.testID) {
+        storage.set(buildHomeworkProblemCodeKey(this.problem._id, from.params.homeworkID), {
+          code: this.code,
+          language: this.language
+        })
+      }
       next()
     },
     watch: {

@@ -14,7 +14,7 @@ function submissionTimeFormat (time) {
   if (time === undefined) return '--'
   return time + 'ms'
 }
-
+// 计算通过率
 function getACRate (acCount, totalCount) {
   let rate = totalCount === 0 ? 0.00 : (acCount / totalCount * 100).toFixed(2)
   return String(rate) + '%'

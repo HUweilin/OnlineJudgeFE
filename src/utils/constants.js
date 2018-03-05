@@ -69,7 +69,13 @@ export const JUDGE_STATUS = {
     type: 'warning'
   }
 }
-
+export const SUBMISSION_LANGUAGE = {
+  '0': 'C++',
+  '1': 'C',
+  '2': 'Java',
+  '3': 'Python2',
+  '4': 'Python3'
+}
 export const CONTEST_STATUS = {
   'NOT_START': '1',
   'UNDERWAY': '0',
@@ -91,6 +97,27 @@ export const CONTEST_STATUS_REVERSE = {
   }
 }
 
+export const EXAMINATION_STATUS = {
+  'NOT_START': '1',
+  'UNDERWAY': '0',
+  'ENDED': '-1'
+}
+
+export const EXAMINATION_STATUS_REVERSE = {
+  '1': {
+    name: '等待',
+    color: 'yellow'
+  },
+  '0': {
+    name: '进行中',
+    color: 'green'
+  },
+  '-1': {
+    name: '已结束',
+    color: 'red'
+  }
+}
+
 export const RULE_TYPE = {
   ACM: 'ACM',
   OI: 'OI'
@@ -98,6 +125,11 @@ export const RULE_TYPE = {
 
 export const CONTEST_TYPE = {
   PUBLIC: 'Public',
+  PRIVATE: 'Password Protected'
+}
+
+export const EXAMINATION_TYPE = {
+  PBULIC: 'public',
   PRIVATE: 'Password Protected'
 }
 
@@ -124,4 +156,12 @@ export function buildProblemCodeKey (problemID, contestID = null) {
     return `${STORAGE_KEY.PROBLEM_CODE}_${contestID}_${problemID}`
   }
   return `${STORAGE_KEY.PROBLEM_CODE}_NaN_${problemID}`
+}
+
+export function buildTestProblemCodeKey (problemID, testID) {
+  return `${STORAGE_KEY.PROBLEM_CODE}_${testID}_${problemID}`
+}
+
+export function buildHomeworkProblemCodeKey (problemID, homeworkID) {
+  return `${STORAGE_KEY.PROBLEM_CODE}_${homeworkID}_${problemID}`
 }

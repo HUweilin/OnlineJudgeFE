@@ -2,45 +2,45 @@
   <div class="setting-main">
     <div class="flex-container">
       <div class="left">
-        <p class="section-title">Change Password</p>
+        <p class="section-title">更改密码</p>
         <Form class="setting-content" ref="formPassword" :model="formPassword" :rules="rulePassword">
-          <FormItem label="Old Password" prop="old_password">
+          <FormItem label="当前密码" prop="old_password">
             <Input v-model="formPassword.old_password" type="password"/>
           </FormItem>
-          <FormItem label="New Password" prop="new_password">
+          <FormItem label="新密码" prop="new_password">
             <Input v-model="formPassword.new_password" type="password"/>
           </FormItem>
-          <FormItem label="Confirm New Password" prop="again_password">
+          <FormItem label="确认新密码" prop="again_password">
             <Input v-model="formPassword.again_password" type="password"/>
           </FormItem>
           <FormItem v-if="visible.tfaRequired" label="Two Factor Auth" prop="tfa_code">
             <Input v-model="formPassword.tfa_code"/>
           </FormItem>
           <FormItem v-if="visible.passwordAlert">
-            <Alert type="success">You will need to login again after 5 seconds..</Alert>
+            <Alert type="success">请在5s后重新登录</Alert>
           </FormItem>
-          <Button type="primary" @click="changePassword">Update Password</Button>
+          <Button type="primary" @click="changePassword">更改密码</Button>
         </Form>
       </div>
 
       <div class="middle separator"></div>
 
       <div class="right">
-        <p class="section-title">Change Email</p>
+        <p class="section-title">更改邮箱</p>
         <Form class="setting-content" ref="formEmail" :model="formEmail" :rules="ruleEmail">
-          <FormItem label="Current Password" prop="password">
+          <FormItem label="当前密码" prop="password">
             <Input v-model="formEmail.password" type="password"/>
           </FormItem>
-          <FormItem label="Old Email">
+          <FormItem label="当前邮箱">
             <Input v-model="formEmail.old_email" disabled/>
           </FormItem>
-          <FormItem label="New Email" prop="new_email">
+          <FormItem label="新邮箱" prop="new_email">
             <Input v-model="formEmail.new_email"/>
           </FormItem>
           <FormItem v-if="visible.tfaRequired" label="Two Factor Auth" prop="tfa_code">
             <Input v-model="formEmail.tfa_code"/>
           </FormItem>
-          <Button type="primary" @click="changeEmail">Change Email</Button>
+          <Button type="primary" @click="changeEmail">更改邮箱</Button>
         </Form>
       </div>
     </div>

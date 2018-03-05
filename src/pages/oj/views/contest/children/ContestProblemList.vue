@@ -1,17 +1,17 @@
 <template>
   <div>
     <Panel>
-      <div slot="title">Problems List</div>
+      <div slot="title">题目</div>
       <Table v-if="contestRuleType == 'ACM' || OIContestRealTimePermission"
              :columns="ACMTableColumns"
              :data="problems"
              @on-row-click="goContestProblem"
-             no-data-text="No Problems"></Table>
+             no-data-text="暂无题目"></Table>
       <Table v-else
              :data="problems"
              :columns="OITableColumns"
              @on-row-click="goContestProblem"
-             no-data-text="No Problems"></Table>
+             no-data-text="暂无题目"></Table>
     </Panel>
   </div>
 </template>
@@ -27,21 +27,21 @@
       return {
         ACMTableColumns: [
           {
-            title: '#',
+            title: '编号',
             key: '_id',
             sortType: 'asc',
             width: 150
           },
           {
-            title: 'Title',
+            title: '题目',
             key: 'title'
           },
           {
-            title: 'Total',
+            title: '提交量',
             key: 'submission_number'
           },
           {
-            title: 'AC Rate',
+            title: '通过率',
             render: (h, params) => {
               return h('span', this.getACRate(params.row.accepted_number, params.row.submission_number))
             }

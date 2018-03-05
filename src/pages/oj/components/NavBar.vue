@@ -69,6 +69,9 @@
               <Menu-item name="/status">
                 状态
               </Menu-item>
+              <Menu-item name="/acm-rank">
+                排行榜
+              </Menu-item>
             </Submenu>
             <Menu-item name="/contests" class="ivu-col ivu-col-span-sm-3">
               <Icon type="trophy"></Icon>
@@ -77,13 +80,13 @@
             <Submenu name="" class="ivu-col ivu-col-span-sm-4 ivu-col-span-md-3">
               <template slot="title">
                 <Icon type="podium"></Icon>
-                比例
+                课堂测验
               </template>
-              <Menu-item name="/acm-rank">
-                ACM 比例
+              <Menu-item name="/tests">
+                课堂训练
               </Menu-item>
-              <Menu-item name="/oi-rank">
-                OI 比例
+              <Menu-item name="/homeworkList">
+                课后作业
               </Menu-item>
             </Submenu>
             <Submenu name="" class="ivu-col ivu-col-span-sm-4 ivu-col-span-md-3">
@@ -235,7 +238,7 @@
       margin-bottom: 0;
       border: none;
       &.navbar-fixed-top {
-        z-index: 50;
+        z-index: 901;
       }
       .navbar-header {
         .navbar-brand {

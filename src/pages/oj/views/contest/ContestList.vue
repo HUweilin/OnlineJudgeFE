@@ -40,44 +40,8 @@
         :columns="tableColumns"
         :data="contests"
         :loading="loading"
-        size="small"
+        :no-data-text="暂无竞赛"
         disabled-hover></Table>
-      <p id="no-contest" v-if="contests.length == 0">暂无竞赛</p>
-      <ol id="contest-list">
-        <li v-for="contest in contests">
-          <Row type="flex" justify="space-between" align="middle">
-            <img class="trophy" src="../../../../assets/Cup.png"/>
-            <Col :span="18" class="contest-main">
-            <p class="title">
-              <a class="entry" @click.stop="goContest(contest)">
-                {{contest.title}}
-              </a>
-              <template v-if="contest.contest_type != 'Public'">
-                <Icon type="ios-locked-outline" size="20"></Icon>
-              </template>
-            </p>
-            <ul class="detail">
-              <li>
-                <Icon type="calendar" color="#3091f2"></Icon>
-                {{contest.start_time | localtime('YYYY-M-D HH:mm') }}
-              </li>
-              <li>
-                <Icon type="android-time" color="#3091f2"></Icon>
-                {{getDuration(contest.start_time, contest.end_time)}}
-              </li>
-              <li>
-                <Button size="small" shape="circle" @click="onRuleChange(contest.rule_type)">
-                  {{contest.rule_type}}
-                </Button>
-              </li>
-            </ul>
-            </Col>
-            <Col :span="4" style="text-align: center">
-            <Tag type="dot" :color="CONTEST_STATUS_REVERSE[contest.status].color">{{CONTEST_STATUS_REVERSE[contest.status].name}}</Tag>
-            </Col>
-          </Row>
-        </li>
-      </ol>
     </Panel>
     <Pagination :total="total" :pageSize="limit" @on-change="getContestList" :current.sync="page"></Pagination>
     </Col>
@@ -120,6 +84,7 @@
           {
             title: '编号',
             key: 'id',
+            align: 'center',
             render: (h, params) => {
               return h('Button', {
                 props: {
@@ -131,38 +96,91 @@
                     // this.$router.push({name: 'contest-details', params: {}})
                     this.goContest(params.row)
                   }
-                },
-                style: {
-                  padding: '2px 0'
                 }
               }, params.row.id)
             }
           },
           {
             title: '题目',
+            width: '25%',
+            align: 'center',
+            ellipsis: true,
             render: (h, params) => {
-              return h('Button', {
-                props: {
-                  type: 'text',
-                  size: 'large'
-                },
+              const display = (params.row.contest_type !== 'Public') ? 'inline-block' : 'none'
+              return h('div', {
                 on: {
                   click: () => {
                     this.goContest(params.row)
                   }
                 },
                 style: {
-                  padding: '2px 0'
+                  cursor: 'pointer'
                 }
-              }, params.row.title)
+              }, [
+                params.row.title,
+                h('Icon', {
+                  props: {
+                    type: 'ios-locked-outline',
+                    size: '20'
+                  },
+                  style: {
+                    'margin-left': '3px',
+                    display: display
+                  }
+                })
+              ])
             }
           },
           {
             title: '开始时间',
+            align: 'center',
             render: (h, params) => {
-              console.log(this)
-              // 需要改进!
-              return h('span', this.getLocalTime(params.row.start_time, 'YYYY-M-D HH:mm'))
+              // 可改进?
+              return h('span', time.utcToLocal(params.row.start_time, 'YYYY-M-D HH:mm'))
+            }
+          },
+          {
+            title: '结束时间',
+            align: 'center',
+            render: (h, params) => {
+              // 可改进?
+              return h('span', time.utcToLocal(params.row.end_time, 'YYYY-M-D HH:mm'))
+            }
+          },
+          {
+            title: '状态',
+            align: 'center',
+            render: (h, params) => {
+              return h('Tag', {
+                props: {
+                  type: 'dot',
+                  color: `${CONTEST_STATUS_REVERSE[params.row.status].color}`
+                }
+              }, CONTEST_STATUS_REVERSE[params.row.status].name)
+            }
+          },
+          {
+            title: '类型',
+            align: 'center',
+            render: (h, params) => {
+              return h('Button', {
+                props: {
+                  size: 'small',
+                  shape: 'circle'
+                },
+                on: {
+                  click: () => {
+                    this.onRuleChange(params.row.rule_type)
+                  }
+                }
+              }, params.row.rule_type)
+            }
+          },
+          {
+            title: '创建者',
+            align: 'center',
+            render: (h, params) => {
+              return params.row.created_by.username
             }
           }
         ]
@@ -174,7 +192,7 @@
           vm.contests = res.data.data.results
           vm.total = res.data.data.total
           vm.loading = false
-          console.log(vm.contests)
+          // console.log(vm.contests)
         })
       }, (res) => {
         next((vm) => {
@@ -219,19 +237,13 @@
       },
       goContest (contest) {
         this.cur_contest_id = contest.id
+        // 如果不是公共类型且处于未登录状态进入语句
         if (contest.contest_type !== CONTEST_TYPE.PUBLIC && !this.isAuthenticated) {
-          this.$error('Please login first.')
+          this.$error('请先登录')
           this.$store.dispatch('changeModalStatus', {visible: true})
         } else {
           this.$router.push({name: 'contest-details', params: {contestID: contest.id}})
         }
-      },
-
-      getDuration (startTime, endTime) {
-        return time.duration(startTime, endTime)
-      },
-      getLocalTime (startTime, format) {
-        return time.utcToLocal(startTime, format)
       }
     },
     computed: {

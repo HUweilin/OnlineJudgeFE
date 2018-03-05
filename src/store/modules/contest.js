@@ -15,7 +15,7 @@ const state = {
   contestProblems: [],
   itemVisible: {
     menu: true,
-    chart: true,
+    chart: true, // 是否显示排行榜图表
     realName: false
   }
 }
@@ -59,6 +59,7 @@ const getters = {
     }
     return state.contest.real_time_rank === true || getters.isContestAdmin
   },
+  // 判断代码提交按钮是否可点击
   problemSubmitDisabled: (state, getters, _, rootGetters) => {
     if (getters.contestStatus === CONTEST_STATUS.ENDED) {
       return true
@@ -81,7 +82,7 @@ const getters = {
       let duration = moment.duration(getters.contestStartTime.diff(state.now, 'seconds'), 'seconds')
       // time is too long
       if (duration.weeks() > 0) {
-        return 'Start At ' + duration.humanize()
+        return duration.humanize() + '开始'
       }
       let texts = [Math.floor(duration.asHours()), duration.minutes(), duration.seconds()]
       return '-' + texts.join(':')
@@ -90,7 +91,7 @@ const getters = {
       let texts = [Math.floor(duration.asHours()), duration.minutes(), duration.seconds()]
       return '-' + texts.join(':')
     } else {
-      return 'Ended'
+      return '已结束'
     }
   }
 }

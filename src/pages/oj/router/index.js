@@ -22,10 +22,12 @@ const router = new VueRouter({
 
 // 全局身份确认
 router.beforeEach((to, from, next) => {
+  // iview的loading-bar组件,顶部的进度条
   Vue.prototype.$Loading.start()
+  // 这里是直接在地址栏输入url时会判断 路由中只有登录后的设置界面有设置requiresAuth属性
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!storage.get(STORAGE_KEY.AUTHED)) {
-      Vue.prototype.$error('Please login first')
+      Vue.prototype.$error('请先登录!!!')
       store.commit(types.CHANGE_MODAL_STATUS, {mode: 'login', visible: true})
       next({
         name: 'home'

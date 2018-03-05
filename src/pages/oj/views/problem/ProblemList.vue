@@ -20,7 +20,7 @@
     </Col>
     <Col :sm="19" :xs="24">
       <Panel shadow>
-        <div slot="title">编程题列表</div>
+        <div slot="title">题库列表</div>
         <div slot="extra">
           <ul class="filter">
             <li>
@@ -36,12 +36,6 @@
                 </Dropdown-menu>
               </Dropdown>
             </li>
-            <!-- <li>
-              <i-switch size="large" @on-change="handleTagsVisible">
-                <span slot="open">Tags</span>
-                <span slot="close">Tags</span>
-              </i-switch>
-            </li> -->
             <li>
               <Input v-model="query.keyword"
                      @on-enter="filterByKeyword"
@@ -67,7 +61,11 @@
       </Panel>
       <Pagination :total="total" :page-size="limit" @on-change="pushRouter" :current.sync="query.page"></Pagination>
     </Col>
-
+    <modal v-model="showSmallPro" scrollable="true" width="40%">
+      <div slot="header">{{smallProblem.test}}</div>
+      <component :is="smallProType" v-if="showSmallPro" :problem="smallProblem" @on-close="closeSmallPro"></component>
+      <div slot="footer" style="display: none;"></div>
+    </modal>
     
   </Row>
 </template>
@@ -79,19 +77,25 @@
   import { client } from '@/utils/dom.js'
   import { ProblemMixin } from '@oj/components/mixins'
   import Pagination from '@oj/components/Pagination'
-  
+  import blank from '@oj/views/smallProblems/blank.vue'
+  import choice from '@oj/views/smallProblems/choice.vue'
+  const SMALL_TYPE0 = 'choice' // 选择题
+  const SMALL_TYPE1 = 'blank' // 填空题
+  // const SMALL_TYPE2 = 'checking'
   export default {
     name: 'ProblemList',
     mixins: [ProblemMixin],
     components: {
-      Pagination
+      Pagination,
+      blank,
+      choice
     },
     data () {
       return {
         tagList: [],
         problemTableColumns: [
           {
-            title: '#',
+            title: '编号',
             key: '_id',
             render: (h, params) => {
               return h('Button', {
@@ -101,11 +105,16 @@
                 },
                 on: {
                   click: () => {
-                    this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
+                    if (this.routeName === 'problem-list') {
+                      this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
+                    } else if (this.routeName === 'small-problem-list') {
+                      this.openSmallProModal(params.row)
+                    }
                   }
                 },
                 style: {
-                  padding: '2px 0'
+                  padding: '2px 0',
+                  'box-shadow': 'none !important'
                 }
               }, params.row._id)
             }
@@ -121,27 +130,18 @@
                 },
                 on: {
                   click: () => {
-                    this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
+                    if (this.routeName === 'problem-list') {
+                      this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
+                    } else if (this.routeName === 'small-problem-list') {
+                      this.openSmallProModal(params.row)
+                    }
                   }
                 },
                 style: {
-                  padding: '2px 0'
+                  padding: '2px 0',
+                  'box-shadow': 'none !important'
                 }
               }, params.row.title)
-            }
-          },
-          {
-            title: '难度',
-            render: (h, params) => {
-              let t = params.row.difficulty
-              let color = 'blue'
-              if (t === 'Low') color = 'green'
-              else if (t === 'High') color = 'yellow'
-              return h('Tag', {
-                props: {
-                  color: color
-                }
-              }, params.row.difficulty)
             }
           },
           {
@@ -178,6 +178,7 @@
           table: true,
           tag: true
         },
+        // 当前跳转的主路由的name
         routeName: '',
         query: {
           keyword: '',
@@ -185,11 +186,16 @@
           tag: '',
           page: 1
         },
-        clientHeight: 0
+        clientHeight: 0,
+        smallProblem: {},
+        showSmallPro: false,
+        // 小题的类型
+        smallProType: ''
       }
     },
     mounted () {
       this.init()
+      // 自适应题目列表的高度
       this.clientHeight = this.tableHeight()
       this.setTagHeight()
       window.onresize = () => {
@@ -215,22 +221,53 @@
       },
       pushRouter () {
         this.$router.push({
-          name: 'problem-list',
+          name: this.routeName,
           query: utils.filterEmptyValue(this.query)
         })
       },
       getProblemList () {
         let offset = (this.query.page - 1) * this.limit
         this.loadings.table = true
-        api.getProblemList(offset, this.limit, this.query).then(res => {
+        // console.log(this.routeName)
+        let func = this.routeName === 'problem-list' ? 'getProblemList' : 'getSmallProList'
+        api[func](offset, this.limit, this.query).then(res => {
           this.loadings.table = false
           this.total = res.data.data.total
           this.problemList = res.data.data.results
           if (this.isAuthenticated) {
+            // 若是登录状态则添加一栏(做题结果)
             this.addStatusColumn(this.problemTableColumns, res.data.data.results)
           }
         }, res => {
           this.loadings.table = false
+          this.problemList = [{
+            test: '填空测试',
+            _id: 'id',
+            title: '填空题',
+            content: '中华人民共和国成立于___年__月__日,测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响',
+            type: '1' // 0为选择 1为填空
+          },
+          {
+            test: '填空测试2',
+            _id: 'xxx',
+            title: '填空题2',
+            content: '中华人民共和国成立于___年__月__日_____时',
+            type: '1', // 0为选择 1为填空
+            model_answers: ['1949', '10', 1, '09'],
+            my_answers: ['aa']
+          },
+          {
+            test: '选择测试',
+            _id: 'id',
+            title: '选择题',
+            content: '这是一道选择题，请选择',
+            options: ['1', 'yes', 'no', '其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错'],
+            type: '0', // 0为选择 1为填空
+            // my_answers: 1,
+            // my_status: 1,
+            modelAnswers: '0'
+          }
+          ]
         })
       },
       getTagList () {
@@ -256,13 +293,7 @@
         this.pushRouter()
       },
       onReset () {
-        this.$router.push({name: 'problem-list'})
-      },
-      pickone () {
-        api.pickone().then(res => {
-          this.$success('Good Luck')
-          this.$router.push({name: 'problem-details', params: {problemID: res.data.data}})
-        })
+        this.$router.push({name: this.routeName})
       },
       // 根据屏幕高度设置表格高度
       tableHeight () {
@@ -297,6 +328,20 @@
           height = 100
         }
         this.$refs.tagCtrl.$el.style.height = height + 'px'
+      },
+      // 打开小题弹窗
+      openSmallProModal (pro) {
+        this.smallProblem = pro
+        if (pro.type === '0') {
+          this.smallProType = SMALL_TYPE0
+        } else if (pro.type === '1') {
+          this.smallProType = SMALL_TYPE1
+        }
+        this.showSmallPro = true
+      },
+      // 关闭小题弹窗
+      closeSmallPro () {
+        this.showSmallPro = false
       }
     },
     computed: {
@@ -305,7 +350,16 @@
     watch: {
       '$route' (newVal, oldVal) {
         if (newVal !== oldVal) {
-          this.init(true)
+          // 小题和编程题复用该组件 所以需要判断参数的值
+          if (newVal.path === oldVal.path) {
+            this.init(true)
+          } else {
+            // 若path不同 说明切换成编程题或小题的路由，
+            // 需要重置加载列表和标签
+            this.tagList = []
+            this.problemList = []
+            this.init()
+          }
         }
       },
       'isAuthenticated' (newVal) {

@@ -40,18 +40,10 @@
       this.getWebsiteConfig()
     },
     methods: {
-      ...mapActions(['getWebsiteConfig', 'changeDomTitle'])
+      ...mapActions(['getWebsiteConfig'])
     },
     computed: {
       ...mapState(['website'])
-    },
-    watch: {
-      'website' () {
-        this.changeDomTitle()
-      },
-      '$route' () {
-        this.changeDomTitle()
-      }
     }
   }
 </script>
