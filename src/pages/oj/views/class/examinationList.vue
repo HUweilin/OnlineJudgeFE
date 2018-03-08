@@ -51,7 +51,8 @@
     },
     data () {
       return {
-        testList: [{id: '1', title: '测试', start_time: '2018-1-2', end_time: '2018-4-1', status: 0, created_by: {username: '2b'}, examination_type: 'Public'}],
+        // [{id: '1', title: '测试', start_time: '2018-1-2', end_time: '2018-4-1', status: 0, created_by: {username: '2b'}, examination_type: 'Public'}]
+        testList: [],
         tableColumns: [
           {
             title: '编号',

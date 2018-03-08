@@ -1,22 +1,22 @@
 <template>
   <Panel :padding="30" class="container">
-    <div slot="title" class="center">Lost Password</div>
+    <div slot="title" class="center">找回密码</div>
     <template v-if="!successApply">
       <Form :rules="ruleResetPassword" :model=formResetPassword ref="formResetPassword">
         <Form-item prop="email">
-          <Input v-model="formResetPassword.email" placeholder="Your Email Address" size="large">
+          <Input v-model="formResetPassword.email" placeholder="邮箱地址" size="large">
           <Icon type="ios-email-outline" slot="prepend"></Icon>
           </Input>
         </Form-item>
         <Form-item prop="captcha" style="margin-bottom:10px">
           <div class="oj-captcha">
             <div class="oj-captcha-code">
-              <Input v-model="formResetPassword.captcha" placeholder="Captcha" size="large">
+              <Input v-model="formResetPassword.captcha" placeholder="验证码" size="large">
               <Icon type="ios-lightbulb-outline" slot="prepend"></Icon>
               </Input>
             </div>
             <div class="oj-captcha-img">
-              <Tooltip content="Click to refresh" placement="top">
+              <Tooltip content="点击刷新" placement="top">
                 <img :src="captchaSrc" @click="getCaptchaSrc"/>
               </Tooltip>
             </div>
@@ -26,13 +26,13 @@
       <Button type="primary"
               @click="sendEmail"
               class="btn" long
-              :loading="btnLoading">Send Password Reset Email
+              :loading="btnLoading">发送密码重置邮件
       </Button>
     </template>
     <template v-else>
       <Alert type="success" show-icon>
-        Success
-        <span slot="desc">Password reset mail has been sent to your email.</span>
+        发送成功
+        <span slot="desc">密码重置邮件已发送至您的邮箱</span>
       </Alert>
     </template>
   </Panel>
@@ -48,7 +48,7 @@
         if (value !== '') {
           api.checkUsernameOrEmail(undefined, value).then(res => {
             if (res.data.data.email === false) {
-              callback(new Error('The email doesn\'t exist'))
+              callback(new Error('该邮箱不存在'))
             } else {
               callback()
             }

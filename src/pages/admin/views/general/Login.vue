@@ -1,15 +1,15 @@
 <template>
   <el-form :model="ruleForm2" :rules="rules2" ref="ruleForm2" label-position="left" label-width="0px"
            class="demo-ruleForm login-container">
-    <h3 class="title">Welcome to Login</h3>
+    <h3 class="title">请登录</h3>
     <el-form-item prop="account">
-      <el-input type="text" v-model="ruleForm2.account" auto-complete="off" placeholder="username" @keyup.enter.native="handleLogin"></el-input>
+      <el-input type="text" v-model="ruleForm2.account" auto-complete="off" placeholder="用户名" @keyup.enter.native="handleLogin"></el-input>
     </el-form-item>
     <el-form-item prop="password">
-      <el-input type="password" v-model="ruleForm2.password" auto-complete="off" placeholder="password" @keyup.enter.native="handleLogin"></el-input>
+      <el-input type="password" v-model="ruleForm2.password" auto-complete="off" placeholder="密码" @keyup.enter.native="handleLogin"></el-input>
     </el-form-item>
     <el-form-item style="width:100%;">
-      <el-button type="primary" style="width:100%;" @click.native.prevent="handleLogin" :loading="logining">GO
+      <el-button type="primary" style="width:100%;" @click.native.prevent="handleLogin" :loading="logining">登录
       </el-button>
     </el-form-item>
   </el-form>
@@ -47,9 +47,10 @@
               this.$router.push({name: 'problem-list'})
             }, () => {
               this.logining = false
+              // this.$router.push({name: 'problem-list'})
             })
           } else {
-            this.$error('Please check the error fields')
+            this.$error('用户名或密码错误')
           }
         })
       }

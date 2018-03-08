@@ -24,7 +24,7 @@
         <div slot="extra">
           <ul class="filter">
             <li>
-              <Dropdown @on-click="filterByDifficulty">
+              <Dropdown v-if="routeName === 'problem-list'" @on-click="filterByDifficulty">
                 <span>{{query.difficulty === '' ? 'Difficulty' : query.difficulty}}
                   <Icon type="arrow-down-b"></Icon>
                 </span>
@@ -62,7 +62,7 @@
       <Pagination :total="total" :page-size="limit" @on-change="pushRouter" :current.sync="query.page"></Pagination>
     </Col>
     <modal v-model="showSmallPro" scrollable="true" width="40%">
-      <div slot="header">{{smallProblem.test}}</div>
+      <div slot="header">{{smallProblem._id}}</div>
       <component :is="smallProType" v-if="showSmallPro" :problem="smallProblem" @on-close="closeSmallPro"></component>
       <div slot="footer" style="display: none;"></div>
     </modal>
@@ -78,17 +78,17 @@
   import { ProblemMixin } from '@oj/components/mixins'
   import Pagination from '@oj/components/Pagination'
   import blank from '@oj/views/smallProblems/blank.vue'
-  import choice from '@oj/views/smallProblems/choice.vue'
-  const SMALL_TYPE0 = 'choice' // 选择题
-  const SMALL_TYPE1 = 'blank' // 填空题
-  // const SMALL_TYPE2 = 'checking'
+  import singleChoice from '@oj/views/smallProblems/singleChoice.vue'
+  import multipleChoice from '@oj/views/smallProblems/multipleChoice.vue'
+  import { SMALL_PROBLEM_TYPE } from '@/utils/constants'
   export default {
     name: 'ProblemList',
     mixins: [ProblemMixin],
     components: {
       Pagination,
-      blank,
-      choice
+      singleChoice,
+      multipleChoice,
+      blank
     },
     data () {
       return {
@@ -155,7 +155,7 @@
             }
           },
           {
-            title: 'Tags',
+            title: '标签',
             align: 'center',
             width: '200px',
             render: (h, params) => {
@@ -240,38 +240,41 @@
           }
         }, res => {
           this.loadings.table = false
-          this.problemList = [{
-            test: '填空测试',
-            _id: 'id',
-            title: '填空题',
-            content: '中华人民共和国成立于___年__月__日,测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响',
-            type: '1' // 0为选择 1为填空
-          },
-          {
-            test: '填空测试2',
-            _id: 'xxx',
-            title: '填空题2',
-            content: '中华人民共和国成立于___年__月__日_____时',
-            type: '1', // 0为选择 1为填空
-            model_answers: ['1949', '10', 1, '09'],
-            my_answers: ['aa']
-          },
-          {
-            test: '选择测试',
-            _id: 'id',
-            title: '选择题',
-            content: '这是一道选择题，请选择',
-            options: ['1', 'yes', 'no', '其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错'],
-            type: '0', // 0为选择 1为填空
-            // my_answers: 1,
-            // my_status: 1,
-            modelAnswers: '0'
-          }
-          ]
+          // 测试
+          // this.problemList = [{
+          //   test: '填空测试',
+          //   _id: 'id',
+          //   title: '填空题',
+          //   content: '中华人民共和国成立于@@1949@@年@@10@@月@@01@@日,测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响',
+          //   type: '2' // 0为单选题 1多选题 2为填空题
+          // },
+          // {
+          //   test: '填空测试2',
+          //   _id: 'xxx',
+          //   title: '填空题2',
+          //   content: '中华人民共和国成立于@@1949@@年@@10@@月@@01@@日@@10:00@@时',
+          //   type: '2', // 0为单选题 1多选题 2为填空题
+          //   model_answers: ['1949', '10', '01', '10:00'],
+          //   my_answers: ['aa']
+          // },
+          // {
+          //   test: '选择测试',
+          //   _id: 'id',
+          //   title: '单选题',
+          //   content: '这是一道选择题，请选择',
+          //   options: ['1', 'yes', 'no', '其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错'],
+          //   type: '0', // 0为单选题 1多选题 2为填空题
+          //   // my_answers: 1,
+          //   // my_status: 1,
+          //   modelAnswers: '0'
+          // }
+          // ]
         })
       },
       getTagList () {
-        api.getProblemTagList().then(res => {
+        let func = (this.routeName === 'problem-list') ? 'getProblemTagList' : 'getSmallProblemTagList'
+        // let func = 'getProblemTagList'
+        api[func]().then(res => {
           this.tagList = res.data.data
           this.loadings.tag = false
         }, res => {
@@ -332,11 +335,19 @@
       // 打开小题弹窗
       openSmallProModal (pro) {
         this.smallProblem = pro
-        if (pro.type === '0') {
-          this.smallProType = SMALL_TYPE0
-        } else if (pro.type === '1') {
-          this.smallProType = SMALL_TYPE1
-        }
+        // 向后台获取小题全部信息
+        // 是在这里获取 还是传入id到小题组件，让其发送请求
+        api.getSmallProblem(pro._id).then(res => {
+          let problem = res.data.data
+          this.smallProblem = problem
+          // 0 为单选 1 为多选 2 为填空
+          this.smallProType = SMALL_PROBLEM_TYPE[problem.type]
+        }, res => {
+          // 测试
+          // this.smallProType = SMALL_PROBLEM_TYPE[0]
+          this.smallProType = SMALL_PROBLEM_TYPE[1]
+          // this.smallProType = SMALL_PROBLEM_TYPE[2]
+        })
         this.showSmallPro = true
       },
       // 关闭小题弹窗

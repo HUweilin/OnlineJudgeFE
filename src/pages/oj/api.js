@@ -150,6 +150,16 @@ export default {
       params: params
     })
   },
+  getSmallProblemTagList () {
+    return ajax('smallProblem/tags', 'get')
+  },
+  getSmallProblem (problemID) {
+    return ajax('smallproblem', 'get', {
+      params: {
+        problem_id: problemID
+      }
+    })
+  },
 
   // 获取课堂训练的列表数据
   getTestList (offset, limit, searchParams) {

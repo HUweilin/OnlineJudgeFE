@@ -21,7 +21,7 @@
   import {mapState, mapGetters} from 'vuex'
   import {ProblemMixin} from '@oj/components/mixins'
   import blank from '@oj/views/smallProblems/blank.vue'
-  import choice from '@oj/views/smallProblems/choice.vue'
+  import singleChoice from '@oj/views/smallProblems/singleChoice.vue'
   const SMALL_TYPE0 = 'choice' // 选择题
   const SMALL_TYPE1 = 'blank' // 填空题
   export default {
@@ -29,7 +29,7 @@
     mixins: [ProblemMixin],
     components: {
       blank,
-      choice
+      singleChoice
     },
     data () {
       return {

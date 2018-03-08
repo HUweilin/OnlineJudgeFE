@@ -30,6 +30,7 @@ const getters = {
     let startTime = moment(state.examination.start_time)
     let endTime = moment(state.examination.end_time)
     let now = state.now
+    // 判断是 未开始 或 已结束 或 正在进行
     if (startTime > now) {
       return EXAMINATION_STATUS.NOT_START
     } else if (endTime < now) {
@@ -135,7 +136,8 @@ const actions = {
           dispatch('getTestAccess')
         }
       }, err => {
-        commit(types.CHANGE_EXAMINATION, {examination: {id: '2', title: '测试2', start_time: '2017-1-2', end_time: '2018-4-1', status: -1, created_by: {username: '2b'}, examination_type: EXAMINATION_TYPE.PUBLIC, now: '2018-3-1'}})
+        // 测试
+        // commit(types.CHANGE_EXAMINATION, {examination: {id: '2', title: '测试2', start_time: '2017-1-2', end_time: '2018-4-1', status: -1, created_by: {username: '2b'}, examination_type: EXAMINATION_TYPE.PUBLIC, now: '2018-3-1'}})
         reject(err)
       })
     })
@@ -174,7 +176,7 @@ const actions = {
           dispatch('getHomeworkAccess')
         }
       }, err => {
-        commit(types.CHANGE_EXAMINATION, {examination: {id: '3', title: '测试4', start_time: '2017-1-2', end_time: '2018-5-1', status: 1, created_by: {username: '2b'}, examination_type: EXAMINATION_TYPE.PUBLIC, now: '2018-3-1'}})
+        // commit(types.CHANGE_EXAMINATION, {examination: {id: '3', title: '测试4', start_time: '2017-1-2', end_time: '2018-5-1', status: 1, created_by: {username: '2b'}, examination_type: EXAMINATION_TYPE.PUBLIC, now: '2018-3-1'}})
         reject(err)
       })
     })
