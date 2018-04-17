@@ -165,6 +165,7 @@ export default {
       }
     })
   },
+  // 修改竞赛信息
   editContest (data) {
     return ajax('admin/contest', 'put', {
       data
@@ -294,6 +295,110 @@ export default {
     return ajax('export_problem', 'post', {
       data
     })
+  },
+  // 获取小题题库列表
+  getSmallProblemList (params) {
+    params = utils.filterEmptyValue(params)
+    return ajax('admin/small_problem', 'get', {
+      params
+    })
+  },
+  // 获取小题标签列表
+  getSmallProblemTagList () {
+    return ajax('small_problem/tags', 'get')
+  },
+  // 创建小题
+  createSmallProblem (data) {
+    return ajax('admin/small_problem', 'post', {
+      data
+    })
+  },
+  // 获取小题详细信息
+  getSmallProblem (id) {
+    return ajax('admin/small_problem', 'get', {
+      params: {
+        id
+      }
+    })
+  },
+  // 提交修改的小题信息
+  editSmallProblem (data) {
+    return ajax('admin/small_problem', 'put', {
+      data
+    })
+  },
+  // 删除小题题库的某个题目
+  deleteSmallProblem (id) {
+    return ajax('admin/small_problem', 'delete', {
+      params: {
+        id
+      }
+    })
+  },
+  // 课程模块
+  // 获取当前课程列表
+  getCourseList (offset, limit, keyword) {
+    let params = {paging: true, offset, limit}
+    if (keyword) {
+      params.keyword = keyword
+    }
+    return ajax('admin/course', 'get', {
+      params: params
+    })
+  },
+  // 获取某个课程的信息
+  getCourse (id) {
+    return ajax('admin/course', 'get', {
+      params: {
+        id
+      }
+    })
+  },
+  // 课程公告部分
+  getCourseAnnouncementList (id) {
+    return ajax('admin/course/announcement', 'get', {
+      params: {
+        course_id: id
+      }
+    })
+  },
+  createCourseAnnouncement (data) {
+    return ajax('admin/course/announcement', 'post', {
+      data
+    })
+  },
+  deleteCourseAnnouncement (id) {
+    return ajax('admin/course/announcement', 'delete', {
+      params: {
+        id
+      }
+    })
+  },
+  updateCourseAnnouncement (data) {
+    return ajax('admin/course/announcement', 'put', {
+      data
+    })
+  },
+  // 课程成员部分
+  // 获取课程学生信息
+  getCourseMember (id) {
+    return ajax('admin/course/member', 'get', {
+      params: {
+        course_id: id
+      }
+    })
+  },
+  // 删除课程学生信息
+  deleteCourseMember (data) {
+    return ajax('admin/course/member', 'delete', {
+      data
+    })
+  },
+  // 添加课程学生信息
+  addCourseMember (data) {
+    return ajax('admin/course/member', 'post', {
+      data
+    })
   }
 }
 
@@ -322,13 +427,13 @@ function ajax (url, method, options) {
         Vue.prototype.$error(res.data.data)
         reject(res)
         // // 若后端返回为登录，则为session失效，应退出当前登录用户
-        if (res.data.data.startsWith('请重新登录')) {
+        if (res.data.data.startsWith('Please login')) {
           router.push({name: 'login'})
         }
       } else {
         resolve(res)
         if (method !== 'get') {
-          Vue.prototype.$success('Succeeded')
+          Vue.prototype.$success('操作成功')
         }
       }
     }, res => {

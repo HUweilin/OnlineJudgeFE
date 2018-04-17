@@ -53,14 +53,14 @@ function downloadFile (url) {
         if (resp.data.error) {
           Vue.prototype.$error(resp.data.error)
         } else {
-          Vue.prototype.$error('Invalid file format')
+          Vue.prototype.$error('无效的文件格式')
         }
         fr.onload = (event) => {
           let data = JSON.parse(event.target.result)
           if (data.error) {
             Vue.prototype.$error(data.data)
           } else {
-            Vue.prototype.$error('Invalid file format')
+            Vue.prototype.$error('无效的文件格式')
           }
         }
         let b = new window.Blob([resp.data], {type: 'application/json'})

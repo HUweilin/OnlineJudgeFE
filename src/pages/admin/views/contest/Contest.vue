@@ -4,46 +4,46 @@
       <el-form label-position="top">
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item label="Title" required>
-              <el-input v-model="contest.title" placeholder="Tittle"></el-input>
+            <el-form-item label="标题" required>
+              <el-input v-model="contest.title" placeholder="标题"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="Description" required>
+            <el-form-item label="描述" required>
               <Simditor v-model="contest.description"></Simditor>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Start Time" required>
+            <el-form-item label="开始时间" required>
               <el-date-picker
                 v-model="contest.start_time"
                 type="datetime"
-                placeholder="Start Time">
+                placeholder="开始时间">
               </el-date-picker>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="End Time" required>
+            <el-form-item label="结束时间" required>
               <el-date-picker
                 v-model="contest.end_time"
                 type="datetime"
-                placeholder="End Time">
+                placeholder="结束时间">
               </el-date-picker>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Password">
-              <el-input v-model="contest.password" placeholder="Contest Password"></el-input>
+            <el-form-item label="密码">
+              <el-input v-model="contest.password" placeholder="竞赛 密码"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Contest Rule Type">
+            <el-form-item label="竞赛规则">
               <el-radio class="radio" v-model="contest.rule_type" label="ACM" :disabled="disableRuleType">ACM</el-radio>
               <el-radio class="radio" v-model="contest.rule_type" label="OI" :disabled="disableRuleType">OI</el-radio>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Real Time Rank">
+            <el-form-item label="实时排名">
               <el-switch
                 v-model="contest.real_time_rank"
                 active-color="#13ce66"
@@ -52,7 +52,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Status">
+            <el-form-item label="是否可见">
               <el-switch
                 v-model="contest.visible"
                 active-text=""
@@ -61,7 +61,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="Allowed IP Ranges">
+            <el-form-item label="允许的IP范围">
               <div v-for="(range, index) in contest.allowed_ip_ranges" :key="index">
                 <el-row :gutter="20" style="margin-bottom: 15px">
                   <el-col :span="8">
@@ -93,7 +93,7 @@
     },
     data () {
       return {
-        title: 'Create Contest',
+        title: '创建竞赛',
         disableRuleType: false,
         contest: {
           title: '',
@@ -138,7 +138,7 @@
     },
     mounted () {
       if (this.$route.name === 'edit-contest') {
-        this.title = 'Edit Contest'
+        this.title = '修改竞赛'
         this.disableRuleType = true
         api.getContest(this.$route.params.contestId).then(res => {
           let data = res.data.data

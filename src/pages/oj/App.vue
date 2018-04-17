@@ -7,7 +7,7 @@
       </transition>
       <div id="footer">
         <!-- <p v-html="website.website_footer"></p> -->
-        <p>学院网站: <a href="http://www.gpnu.edu.cn/">广技师官网</a>&nbsp;&nbsp;<a href="http://sxxy.gpnu.edu.cn/">数学院官网</a></p>
+        <p>学院网站: <a href="http://www.gpnu.edu.cn/">广技师官网</a>&nbsp;&nbsp;<a href="http://sxxy.gpnu.edu.cn/">数科院官网</a></p>
         <p>友情链接: <a href="http://114.215.99.34">DI Studio-OJ</a>&nbsp;&nbsp;<a href="http://acm.hdu.edu.cn/">HDU-OJ</a>
           <!-- <span v-if="version">&nbsp; Version: {{ version }}</span> -->
         </p>

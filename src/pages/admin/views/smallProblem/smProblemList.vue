@@ -1,6 +1,6 @@
 <template>
   <div class="view">
-    <Panel :title="contestId ? '竞赛题库' : '题库'">
+    <Panel title="小题题库">
       <div slot="header">
         <el-input
           v-model="keyword"
@@ -19,17 +19,6 @@
           width="100"
           prop="id"
           label="编号">
-        </el-table-column>
-        <el-table-column
-          width="150"
-          label="显示编号">
-          <template slot-scope="{row}">
-            <span v-show="!row.isEditing">{{row._id}}</span>
-            <el-input v-show="row.isEditing" v-model="row._id"
-                      @keyup.enter.native="handleInlineEdit(row)">
-
-            </el-input>
-          </template>
         </el-table-column>
         <el-table-column
           prop="title"
@@ -71,10 +60,10 @@
           width="250">
           <div slot-scope="scope">
             <icon-btn name="修改" icon="edit" @click.native="goEdit(scope.row.id)"></icon-btn>
-            <icon-btn v-if="contestId" name="Make Public" icon="clone"
-                      @click.native="makeContestProblemPublic(scope.row.id)"></icon-btn>
-            <icon-btn icon="download" name="下载测试用例"
-                      @click.native="downloadTestCase(scope.row.id)"></icon-btn>
+            <!-- <icon-btn v-if="contestId" name="添加到公共题目" icon="clone"
+                      @click.native="makeContestProblemPublic(scope.row.id)"></icon-btn> -->
+            <!-- <icon-btn icon="download" name="下载测试用例"
+                      @click.native="downloadTestCase(scope.row.id)"></icon-btn> -->
             <icon-btn icon="trash" name="删除题目"
                       @click.native="deleteProblem(scope.row.id)"></icon-btn>
           </div>
@@ -83,10 +72,6 @@
       <div class="panel-options">
         <el-button type="primary" size="small"
                    @click="goCreateProblem" icon="el-icon-plus">创建
-        </el-button>
-        <el-button v-if="contestId" type="primary"
-                   size="small" icon="el-icon-plus"
-                   @click="addProblemDialogVisible = true">添加公共题目表单
         </el-button>
         <el-pagination
           class="page"
@@ -110,26 +95,15 @@
         <save @click.native="updateProblem(currentRow)"></save>
       </span>
     </el-dialog>
-    <el-dialog title="添加竞赛题目"
-               v-if="contestId"
-               width="80%"
-               :visible.sync="addProblemDialogVisible"
-               @close-on-click-modal="false">
-      <add-problem-component :contestID="contestId" @on-change="getProblemList"></add-problem-component>
-    </el-dialog>
   </div>
 </template>
 
 <script>
   import api from '../../api.js'
   import utils from '@/utils/utils'
-  import AddProblemComponent from './AddPublicProblem.vue'
 
   export default {
-    name: 'ProblemList',
-    components: {
-      AddProblemComponent
-    },
+    name: 'smallProblemList',
     data () {
       return {
         pageSize: 10,
@@ -139,7 +113,7 @@
         loading: false,
         currentPage: 1,
         routeName: '',
-        contestId: '',
+        // contestId: '',
         // for make public use
         currentProblemID: '',
         currentRow: {},
@@ -150,7 +124,7 @@
     },
     mounted () {
       this.routeName = this.$route.name
-      this.contestId = this.$route.params.contestId
+      // this.contestId = this.$route.params.contestId
       this.getProblemList(this.currentPage)
     },
     methods: {
@@ -158,17 +132,13 @@
         row.isEditing = true
       },
       goEdit (problemId) {
-        if (this.routeName === 'problem-list') {
-          this.$router.push({name: 'edit-problem', params: {problemId}})
-        } else if (this.routeName === 'contest-problem-list') {
-          this.$router.push({name: 'edit-contest-problem', params: {problemId: problemId, contestId: this.contestId}})
+        if (this.routeName === 'small-problem-list') {
+          this.$router.push({name: 'edit-small-problem', params: {problemId}})
         }
       },
       goCreateProblem () {
-        if (this.routeName === 'problem-list') {
-          this.$router.push({name: 'create-problem'})
-        } else if (this.routeName === 'contest-problem-list') {
-          this.$router.push({name: 'create-contest-problem', params: {contestId: this.contestId}})
+        if (this.routeName === 'small-problem-list') {
+          this.$router.push({name: 'create-small-problem'})
         }
       },
       // 切换页码回调
@@ -176,16 +146,15 @@
         this.currentPage = page
         this.getProblemList(page)
       },
+      // 获取小题列表
       getProblemList (page = 1) {
         this.loading = true
-        let funcName = this.routeName === 'problem-list' ? 'getProblemList' : 'getContestProblemList'
         let params = {
           limit: this.pageSize,
           offset: (page - 1) * this.pageSize,
-          keyword: this.keyword,
-          contest_id: this.contestId
+          keyword: this.keyword
         }
-        api[funcName](params).then(res => {
+        api.getSmallProblemList(params).then(res => {
           this.loading = false
           this.total = res.data.data.total
           for (let problem of res.data.data.results) {
@@ -197,11 +166,10 @@
         })
       },
       deleteProblem (id) {
-        this.$confirm('您只能删除没有提交过的问题，是否继续?', '删除题目', {
+        this.$confirm('您只能删除没有提交的题目, 是否继续?', '删除题目', {
           type: 'warning'
         }).then(() => {
-          let funcName = this.routeName === 'problem-list' ? 'deleteProblem' : 'deleteContestProblem'
-          api[funcName](id).then(() => [
+          api.deleteSmallProblem(id).then(() => [
             this.getProblemList(this.currentPage - 1)
           ]).catch(() => {
           })
@@ -209,21 +177,14 @@
         })
       },
       makeContestProblemPublic (problemID) {
-        this.$prompt('请给公共题目输入展示编号', '确认').then(({value}) => {
+        this.$prompt('请为其添加为公共题目的展示编号', '确认').then(({value}) => {
           api.makeContestProblemPublic({id: problemID, display_id: value}).catch()
         }, () => {
         })
       },
       updateProblem (row) {
         let data = Object.assign({}, row)
-        let funcName = ''
-        if (this.contestId) {
-          data.contest_id = this.contestId
-          funcName = 'editContestProblem'
-        } else {
-          funcName = 'editProblem'
-        }
-        api[funcName](data).then(res => {
+        api.editSmallProblem(data).then(res => {
           this.InlineEditDialogVisible = false
           this.getProblemList(this.currentPage)
         }).catch(() => {
@@ -244,7 +205,7 @@
     },
     watch: {
       '$route' (newVal, oldVal) {
-        this.contestId = newVal.params.contestId
+        // this.contestId = newVal.params.contestId
         this.routeName = newVal.name
         this.getProblemList(this.currentPage)
       },

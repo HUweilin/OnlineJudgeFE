@@ -120,13 +120,17 @@ export const EXAMINATION_STATUS_REVERSE = {
 
 // 小题的回答情况 -1: 未回答 0: 回答正确 1: 回答错误
 export const SMALL_PROBLEM_STATUS = {
-  'NOT_ANSWER': '-1',
-  'RIGHT': '0',
-  'ERROR': '1'
+  'NOT_ANSWER': -1,
+  'RIGHT': 0,
+  'ERROR': 1
 }
 
-// 小题类型 0单选题 1为多选题 2为填空题
-export const SMALL_PROBLEM_TYPE = [ 'singleChoice', 'multipleChoice', 'blank' ]
+// 小题类型 Single单选题 Multiple为多选题 Blank为填空题
+export const SMALL_PROBLEM_TYPE = {
+  Single: 'Single',
+  Multiple: 'Multiple',
+  Blank: 'Blank'
+}
 
 export const RULE_TYPE = {
   ACM: 'ACM',

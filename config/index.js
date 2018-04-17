@@ -2,7 +2,7 @@
 // Template version: 1.1.1  https://qduoj.com
 // see http://vuejs-templates.github.io/webpack for documentation.
 process.env.TARGET='https://qduoj.com/'//自己加的192.168.1.139:8000
-// process.env.TARGET='http://110.65.98.121:8000/'
+process.env.TARGET='http://110.65.98.121:8000/'
 const path = require('path')
 const commonProxy = {
   onProxyReq: (proxyReq, req, res) => {

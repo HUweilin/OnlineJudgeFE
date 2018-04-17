@@ -20,6 +20,7 @@ const getters = {
   isSuperAdmin: (state, getters) => {
     return getters.user.admin_type === USER_TYPE.SUPER_ADMIN
   },
+  // 是否有问题提交权限
   hasProblemPermission: (state, getters) => {
     return getters.user.problem_permission !== PROBLEM_PERMISSION.NONE
   }

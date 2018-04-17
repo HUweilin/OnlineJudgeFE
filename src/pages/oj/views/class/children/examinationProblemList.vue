@@ -20,20 +20,20 @@
 <script>
   import {mapState, mapGetters} from 'vuex'
   import {ProblemMixin} from '@oj/components/mixins'
-  import blank from '@oj/views/smallProblems/blank.vue'
-  import singleChoice from '@oj/views/smallProblems/singleChoice.vue'
-  const SMALL_TYPE0 = 'choice' // 选择题
-  const SMALL_TYPE1 = 'blank' // 填空题
+  import Blank from '@oj/views/smallProblems/blank.vue'
+  import Single from '@oj/views/smallProblems/singleChoice.vue'
+  import Multiple from '@oj/views/smallProblems/multipleChoice.vue'
+  import { SMALL_PROBLEM_TYPE } from '@/utils/constants'
   export default {
     name: 'exam-problem-list',
     mixins: [ProblemMixin],
     components: {
-      blank,
-      singleChoice
+      Blank,
+      Single,
+      Multiple
     },
     data () {
       return {
-        testPro: [{_id: 22, title: '测试', test: '111', submission_number: 20, accepted_number: 10, content: '正文', type: 0}, {_id: 11, title: '测试2', content: '正文不分分___好好好', test: '222', submission_number: 20, accepted_number: 5, type: 1}, {_id: 3, title: '编程题', submission_number: 30, accepted_number: 3}],
         TableColumns: [
           {
             title: '编号',
@@ -89,11 +89,7 @@
         // 先假设编程题没有type键值对 小题有 就可作出以下判断
         if (problem.type !== '' && problem.type !== undefined) {
           this.smallProblem = problem
-          if (problem.type === 0) {
-            this.smallProType = SMALL_TYPE0
-          } else if (problem.type === 1) {
-            this.smallProType = SMALL_TYPE1
-          }
+          this.smallProType = SMALL_PROBLEM_TYPE[problem.type]
           this.showSmallPro = true
         } else {
           this.$router.push({name: 'test-problem-details', params: {problemID: problem._id}})

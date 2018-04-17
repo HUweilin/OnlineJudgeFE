@@ -11,10 +11,10 @@
                 shape="circle"
                 class="tag-btn">{{tag.name}}
         </Button>
-        <Button long id="pick-one" @click="pickone">
+        <!-- <Button long id="pick-one" @click="pickone">
           <Icon type="shuffle"></Icon>
           Pick one
-        </Button>
+        </Button> -->
       </Panel>
       <Spin v-if="loadings.tag" fix size="large"></Spin>
     </Col>
@@ -33,6 +33,17 @@
                   <Dropdown-item name="Low">Low</Dropdown-item>
                   <Dropdown-item name="Mid">Mid</Dropdown-item>
                   <Dropdown-item name="High">High</Dropdown-item>
+                </Dropdown-menu>
+              </Dropdown>
+              <Dropdown v-else @on-click="filterByType">
+                <span>{{query.type === '' ? '类型' : smallProTypeArr[query.type]}}
+                  <Icon type="arrow-down-b"></Icon>
+                </span>
+                <Dropdown-menu slot="list">
+                  <Dropdown-item name="">所有</Dropdown-item>
+                  <Dropdown-item name="Single">单选题</Dropdown-item>
+                  <Dropdown-item name="Multiple">多选题</Dropdown-item>
+                  <Dropdown-item name="Blank">填空题</Dropdown-item>
                 </Dropdown-menu>
               </Dropdown>
             </li>
@@ -63,7 +74,7 @@
     </Col>
     <modal v-model="showSmallPro" scrollable="true" width="40%">
       <div slot="header">{{smallProblem._id}}</div>
-      <component :is="smallProType" v-if="showSmallPro" :problem="smallProblem" @on-close="closeSmallPro"></component>
+      <component :is="smallProType" v-if="showSmallPro" :problem="smallProblem" @succeed="init('true')"></component>
       <div slot="footer" style="display: none;"></div>
     </modal>
     
@@ -77,18 +88,18 @@
   import { client } from '@/utils/dom.js'
   import { ProblemMixin } from '@oj/components/mixins'
   import Pagination from '@oj/components/Pagination'
-  import blank from '@oj/views/smallProblems/blank.vue'
-  import singleChoice from '@oj/views/smallProblems/singleChoice.vue'
-  import multipleChoice from '@oj/views/smallProblems/multipleChoice.vue'
+  import Blank from '@oj/views/smallProblems/blank.vue'
+  import Single from '@oj/views/smallProblems/singleChoice.vue'
+  import Multiple from '@oj/views/smallProblems/multipleChoice.vue'
   import { SMALL_PROBLEM_TYPE } from '@/utils/constants'
   export default {
     name: 'ProblemList',
     mixins: [ProblemMixin],
     components: {
       Pagination,
-      singleChoice,
-      multipleChoice,
-      blank
+      Blank,
+      Single,
+      Multiple
     },
     data () {
       return {
@@ -96,7 +107,7 @@
         problemTableColumns: [
           {
             title: '编号',
-            key: '_id',
+            align: 'center',
             render: (h, params) => {
               return h('Button', {
                 props: {
@@ -146,10 +157,12 @@
           },
           {
             title: '提交量',
+            align: 'center',
             key: 'submission_number'
           },
           {
             title: '通过率',
+            align: 'center',
             render: (h, params) => {
               return h('span', this.getACRate(params.row.accepted_number, params.row.submission_number))
             }
@@ -183,6 +196,8 @@
         query: {
           keyword: '',
           difficulty: '',
+          // 小题类型
+          type: '',
           tag: '',
           page: 1
         },
@@ -190,7 +205,12 @@
         smallProblem: {},
         showSmallPro: false,
         // 小题的类型
-        smallProType: ''
+        smallProType: '',
+        smallProTypeArr: {
+          'Single': '单选题',
+          'Multiple': '多选题',
+          'Blank': '填空题'
+        }
       }
     },
     mounted () {
@@ -228,7 +248,6 @@
       getProblemList () {
         let offset = (this.query.page - 1) * this.limit
         this.loadings.table = true
-        // console.log(this.routeName)
         let func = this.routeName === 'problem-list' ? 'getProblemList' : 'getSmallProList'
         api[func](offset, this.limit, this.query).then(res => {
           this.loadings.table = false
@@ -240,35 +259,6 @@
           }
         }, res => {
           this.loadings.table = false
-          // 测试
-          // this.problemList = [{
-          //   test: '填空测试',
-          //   _id: 'id',
-          //   title: '填空题',
-          //   content: '中华人民共和国成立于@@1949@@年@@10@@月@@01@@日,测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响测试题目长度对显示的影响',
-          //   type: '2' // 0为单选题 1多选题 2为填空题
-          // },
-          // {
-          //   test: '填空测试2',
-          //   _id: 'xxx',
-          //   title: '填空题2',
-          //   content: '中华人民共和国成立于@@1949@@年@@10@@月@@01@@日@@10:00@@时',
-          //   type: '2', // 0为单选题 1多选题 2为填空题
-          //   model_answers: ['1949', '10', '01', '10:00'],
-          //   my_answers: ['aa']
-          // },
-          // {
-          //   test: '选择测试',
-          //   _id: 'id',
-          //   title: '单选题',
-          //   content: '这是一道选择题，请选择',
-          //   options: ['1', 'yes', 'no', '其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错'],
-          //   type: '0', // 0为单选题 1多选题 2为填空题
-          //   // my_answers: 1,
-          //   // my_status: 1,
-          //   modelAnswers: '0'
-          // }
-          // ]
         })
       },
       getTagList () {
@@ -288,6 +278,11 @@
       },
       filterByDifficulty (difficulty) {
         this.query.difficulty = difficulty
+        this.query.page = 1
+        this.pushRouter()
+      },
+      filterByType (type) {
+        this.query.type = type
         this.query.page = 1
         this.pushRouter()
       },
@@ -334,25 +329,29 @@
       },
       // 打开小题弹窗
       openSmallProModal (pro) {
-        this.smallProblem = pro
         // 向后台获取小题全部信息
-        // 是在这里获取 还是传入id到小题组件，让其发送请求
+        // 是在这里获取，让其发送请求
         api.getSmallProblem(pro._id).then(res => {
           let problem = res.data.data
+          // 若已登录 则将my_status和my_answer的结果也传进去
+          if (this.isAuthenticated) {
+            problem.my_status = pro.my_status
+            problem.my_answer = pro.my_answer
+          }
           this.smallProblem = problem
-          // 0 为单选 1 为多选 2 为填空
+          // Single 为单选 Multiple 为多选 Blank 为填空
+
           this.smallProType = SMALL_PROBLEM_TYPE[problem.type]
         }, res => {
-          // 测试
-          // this.smallProType = SMALL_PROBLEM_TYPE[0]
-          this.smallProType = SMALL_PROBLEM_TYPE[1]
-          // this.smallProType = SMALL_PROBLEM_TYPE[2]
+          console.log('失败le')
         })
+        this.$nextTick(() => {})
         this.showSmallPro = true
       },
       // 关闭小题弹窗
       closeSmallPro () {
         this.showSmallPro = false
+        this.smallProblem = {}
       }
     },
     computed: {
@@ -376,6 +375,13 @@
       'isAuthenticated' (newVal) {
         if (newVal === true) {
           this.init()
+        }
+      },
+      'showSmallPro' (val) {
+        if (val === false) {
+          // 弹窗类型 小题均设为空
+          this.smallProType = ''
+          this.smallProblem = {}
         }
       }
     }

@@ -1,19 +1,23 @@
 <template>
-  <textarea ref="editor"></textarea>
+  <div>
+    <textarea ref="editor"></textarea>
+    <!-- 用mathJax渲染其中的数学公式 -->
+    <div id="render-content" v-html="renderData"></div>
+  </div>
 </template>
 
 <script>
   import Simditor from 'simditor'
   import 'simditor/styles/simditor.css'
-  import 'simditor-markdown'
-  import 'simditor-markdown/styles/simditor-markdown.css'
+  // import 'simditor-markdown'
+  // import 'simditor-markdown/styles/simditor-markdown.css'
 
   export default {
     name: 'Simditor',
     props: {
       toolbar: {
         type: Array,
-        default: () => ['title', 'bold', 'italic', 'underline', 'fontScale', 'color', 'ol', 'ul', '|', 'link', 'image', 'hr', '|', 'indent', 'outdent', 'alignment', '|', 'markdown']
+        default: () => ['title', 'bold', 'italic', 'underline', 'fontScale', 'color', 'ol', 'ul', '|', 'link', 'image', 'hr', '|', 'indent', 'outdent', 'alignment'] //, '|', 'markdown'
       },
       value: {
         type: String,
@@ -23,11 +27,13 @@
     data () {
       return {
         editor: null,
-        currentValue: this.value
+        currentValue: this.value,
+        renderData: ''
       }
     },
     mounted () {
-      Simditor.locale = 'en-US'
+      Simditor.locale = 'zh-CN'
+      // Simditor.locale = 'en-US'
       this.editor = new Simditor({
         textarea: this.$refs.editor,
         toolbar: this.toolbar,
@@ -38,7 +44,7 @@
           params: null,
           fileKey: 'image',
           connectionCount: 3,
-          leaveConfirm: 'Uploading is in progress, are you sure to leave this page?'
+          leaveConfirm: '图片正在上传,确认离开该页面?'
         }
       })
       this.editor.on('valuechanged', (e, src) => {
@@ -49,6 +55,12 @@
       })
 
       this.editor.setValue(this.value)
+      this.renderData = this.currentValue
+      this.$nextTick(() => {
+        if (window.MathJax) {
+          window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, 'render-content'])
+        }
+      })
     },
     watch: {
       'value' (val) {
@@ -61,6 +73,12 @@
         if (newVal !== oldVal) {
           this.$emit('change', newVal)
           this.$emit('input', newVal)
+          this.renderData = this.currentValue
+          this.$nextTick(() => {
+            if (window.MathJax) {
+              window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, 'render-content'])
+            }
+          })
         }
       }
     }

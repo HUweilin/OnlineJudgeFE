@@ -4,7 +4,7 @@ import App from './App.vue'
 import store from '@/store'
 import Element from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-// import locale from 'element-ui/lib/locale/lang/en'
+import locale from 'element-ui/lib/locale/lang/zh-CN'
 
 import filters from '@/utils/filters'
 import router from './router'
@@ -20,8 +20,8 @@ Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])
 })
 
-// Vue.use(Element, {locale})
-Vue.use(Element)
+Vue.use(Element, {locale})
+// Vue.use(Element)
 // Vue.use(VueI18n)
 Vue.component(IconBtn.name, IconBtn)
 Vue.component(Panel.name, Panel)
@@ -38,7 +38,7 @@ Vue.prototype.$warning = (msg) => {
 
 Vue.prototype.$success = (msg) => {
   if (!msg) {
-    Vue.prototype.$message({'message': 'Succeeded', 'type': 'success'})
+    Vue.prototype.$message({'message': '成功', 'type': 'success'})
   } else {
     Vue.prototype.$message({'message': msg, 'type': 'success'})
   }

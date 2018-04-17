@@ -164,9 +164,11 @@
           return false
         }
         let reader = new window.FileReader()
+        // 文件读取完成后触发
         reader.onload = (e) => {
           this.avatarOption.imgSrc = e.target.result
         }
+        // 将文件读取为DataURL
         reader.readAsDataURL(file)
         return false
       },

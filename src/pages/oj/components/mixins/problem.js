@@ -14,14 +14,14 @@ export default {
       // 已添加过直接返回
       if (this.statusColumn) return
       // 只在有做题记录时才添加column
-      let needAdd = dataProblems.some((item, index) => {
-        if (item.my_status !== null && item.my_status !== undefined) {
-          return true
-        }
-      })
-      if (!needAdd) {
-        return
-      }
+      // let needAdd = dataProblems.some((item, index) => {
+      //   if (item.my_status !== null && item.my_status !== undefined) {
+      //     return true
+      //   }
+      // })
+      // if (!needAdd) {
+      //   return
+      // }
       tableColumns.splice(0, 0, {
         width: '60',
         title: ' ',

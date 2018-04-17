@@ -3,12 +3,13 @@
 		<!-- 在分割出来的填空题段插入输入框 -->
 		<div class="problem-container">
 			<div class="problem" v-for="(item, index) in problemSplit">
-				<span>{{item}}</span>
-				<Input v-if="index !== problemSplit.length - 1" v-model="answers[index]" :autofocus="index===0" style="width: 80px;" size="small"/>
+				<div style="display: inline-block;" v-html="item"></div>
+        <!-- <span>{{item}}</span> -->
+				<Input v-if="index !== problemSplit.length - 1" v-model="answers[index]" :autofocus="index===0" style="width: 80px; display: inline-block;" size="small"/>
 			</div>
 		</div>
     <!-- 测验或非测验，只要答过题就不显示 -->
-		<Button v-if="my_status === SMALL_PROBLEM_STATUS.NOT_ANSWER" :loading="loading" type="primary" @click="submitAnswer" :disabled="problemSubmitDisabled" long>提交</Button>
+		<Button v-if="my_status === SMALL_PROBLEM_STATUS.NOT_ANSWER || my_status === undefined" :loading="loading" type="primary" @click="submitAnswer" :disabled="problemSubmitDisabled" long>提交</Button>
     <!-- 不是测验且要登录且非未答题状态则显示 -->
 		<div v-else-if="isAuthenticated && !isExamination" :class="{'answer-true': my_status === SMALL_PROBLEM_STATUS.RIGHT, 'answer-false': my_status === SMALL_PROBLEM_STATUS.ERROR}">
 			正确答案是:<span v-for="ans in modelAnswers">{{ans}};&nbsp;</span>&nbsp;
@@ -41,7 +42,8 @@
           // 课堂测验 或 课后作业ID
           examID: '',
           routeName: '',
-          SMALL_PROBLEM_STATUS: SMALL_PROBLEM_STATUS
+          SMALL_PROBLEM_STATUS: SMALL_PROBLEM_STATUS,
+          my_status: -1
         }
       },
       mounted () {
@@ -49,19 +51,10 @@
       },
       methods: {
         init () {
-          // 将题目内容传递过来
-          // 测试
-          // this.problem = {
-          //   test: '填空测试2',
-          //   _id: 'xxx',
-          //   title: '填空题2',
-          //   content: '中华人民共和国成立于@@1949@@年@@10@@月@@01@@日@@10:00@@时',
-          //   type: '1', // 0为选择 1为填空
-          //   model_answers: ['1949', '10', '01', '10:00'],
-          //   my_answers: ['aa']
-          // }
           this.routeName = this.$route.name
-          this.handleProblem(this.problem.content)
+          // 获取答题的状态
+          this.my_status = this.problem.my_status === null ? -1 : this.problem.my_status
+          this.handleProblem(this.problem.description)
           if (this.routeName === 'test-details') {
               // 如果是课堂测验 某个测验里面
             this.examID = this.$route.params.testID
@@ -72,13 +65,13 @@
           // 若只是在题库中 则不用操作
           // 若登录且已答过题 则将自己的答案补充上去
           if (this.isAuthenticated && (this.my_status === SMALL_PROBLEM_STATUS.RIGHT || this.my_status === SMALL_PROBLEM_STATUS.ERROR)) {
-            this.answers = this.problem.my_answers
+            this.answers = this.problem.my_answer
           }
           // 获取正确答案
-          this.modelAnswers = this.problem.modelAnswers
+          this.modelAnswers = this.problem.answer
         },
         // 对传入的problem进行处理
-        handleProblem (mess = '') {
+        handleProblem (mess) {
           // 将问题中连续的@@答案@@替换为@@，再分割出来
           // 后台的数据中已经有答案的字段 不用分离
           // let exp = /@@(.*?)@@/g
@@ -110,8 +103,8 @@
           } else {
             this.loading = true
             let data = {
-              problem_id: this.problem.id,
-              answer: this.answers
+              id: this.problem.id,
+              my_answer: this.answers
             }
             // 判断是否是测验页面并添加测验的id
             if (this.routeName === 'test-details') {
@@ -122,7 +115,8 @@
             api.submitSmallProblem(data).then(res => {
               this.$success('提交成功')
               this.loading = false
-              this.$emit('on-close')
+              this.my_status = res.data.data.status
+              this.$emit('succeed')
             }, res => {
               this.$error('提交失败,请重试')
               this.loading = false
@@ -130,19 +124,13 @@
           }
         }
       },
+      watch: {
+        'problem.my_status' (val) {
+          this.my_status = val
+        }
+      },
       computed: {
         ...mapGetters(['problemSubmitDisabled', 'isAuthenticated', 'examinationStatus']),
-        my_status () {
-          // 返回的情况为
-          let status = this.problem.my_status
-          if (status === null || status === undefined) {
-            // -1结果为未答题状态
-            return SMALL_PROBLEM_STATUS.NOT_ANSWER
-          } else {
-            // 0 为回答正确 1为回答错误
-            return status
-          }
-        },
         // 是否在测验或者作业页面
         isExamination () {
           if (this.examID) {
@@ -158,8 +146,8 @@
 	.problem-container {
 		margin-bottom: 10px;
 		.problem {
-		display: inline-block;
-		margin: 5px 0;
+		  display: inline-block;
+		  margin: 5px 0;
 		}
 	}
 	.test {

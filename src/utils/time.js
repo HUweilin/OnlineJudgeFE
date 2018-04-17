@@ -21,8 +21,30 @@ function secondFormat (seconds) {
   return m.hours() + ':' + m.minutes() + ':' + m.seconds()
 }
 
+// 后台添加课程时计算开始时间至结束时间的持续时间
+function courseDurationTime (startTime, endTime) {
+  let start = moment(startTime)
+  let end = moment(endTime)
+  let diff = end.diff(start, 'seconds')
+  if (diff < 0) {
+    // 说明结束时间小于开始时间
+    return false
+  }
+  // 相差时间
+  let duration = moment.duration(diff, 'seconds')
+  let day = duration.days()
+  let hour = duration.hours()
+  let min = duration.minutes()
+  if (day === 0) {
+    return hour + ' 小时 ' + min + ' 分 '
+  } else {
+    return day + ' 天 ' + hour + ' 小时 '
+  }
+}
+
 export default {
   utcToLocal: utcToLocal,
   duration: duration,
-  secondFormat: secondFormat
+  secondFormat: secondFormat,
+  courseDurationTime: courseDurationTime
 }

@@ -59,14 +59,6 @@
         </el-table>
         <div class="panel-options">
           <el-button type="primary" size="small" @click="openAnnouncementDialog(null)" icon="el-icon-plus">创建</el-button>
-          <el-pagination
-            v-if="!contestID"
-            class="page"
-            layout="prev, pager, next"
-            @current-change="currentChange"
-            :page-size="pageSize"
-            :total="total">
-          </el-pagination>
         </div>
       </div>
     </Panel>
@@ -101,17 +93,22 @@
 </template>
 
 <script>
-  import Simditor from '../../components/Simditor.vue'
-  import api from '../../api.js'
+  import Simditor from '@admin/components/Simditor.vue'
+  import api from '../../../api.js'
 
   export default {
-    name: 'Announcement',
+    props: {
+      course: {
+        type: Object,
+        required: true
+      }
+    },
     components: {
       Simditor
     },
     data () {
       return {
-        contestID: '',
+        courseID: '',
         // 显示编辑公告对话框
         showEditAnnouncementDialog: false,
         // 公告列表
@@ -132,9 +129,7 @@
         // 对话框标题
         announcementDialogTitle: '修改公告',
         // 是否显示loading
-        loading: true,
-        // 当前页码
-        currentPage: 0
+        loading: true
       }
     },
     mounted () {
@@ -142,31 +137,12 @@
     },
     methods: {
       init () {
-        this.contestID = this.$route.params.contestId
-        if (this.contestID) {
-          this.getContestAnnouncementList()
-        } else {
-          this.getAnnouncementList(1)
-        }
+        this.courseID = this.$route.params.courseId
+        this.getCourseAnnouncementList()
       },
-      // 切换页码回调
-      currentChange (page) {
-        this.currentPage = page
-        this.getAnnouncementList(page)
-      },
-      getAnnouncementList (page) {
+      getCourseAnnouncementList () {
         this.loading = true
-        api.getAnnouncementList((page - 1) * this.pageSize, this.pageSize).then(res => {
-          this.loading = false
-          this.total = res.data.data.total
-          this.announcementList = res.data.data.results
-        }, res => {
-          this.loading = false
-        })
-      },
-      getContestAnnouncementList () {
-        this.loading = true
-        api.getContestAnnouncementList(this.contestID).then(res => {
+        api.getCourseAnnouncementList(this.courseID).then(res => {
           this.loading = false
           this.announcementList = res.data.data
         }).catch(() => {
@@ -199,12 +175,8 @@
             visible: this.announcement.visible
           }
         }
-        if (this.contestID) {
-          data.contest_id = this.contestID
-          funcName = this.mode === 'edit' ? 'updateContestAnnouncement' : 'createContestAnnouncement'
-        } else {
-          funcName = this.mode === 'edit' ? 'updateAnnouncement' : 'createAnnouncement'
-        }
+        data.course_id = this.courseID
+        funcName = this.mode === 'edit' ? 'updateCourseAnnouncement' : 'createCourseAnnouncement'
         api[funcName](data).then(res => {
           this.showEditAnnouncementDialog = false
           this.init()
@@ -218,8 +190,7 @@
           type: 'warning'
         }).then(() => {
           this.loading = true
-          let funcName = this.contestID ? 'deleteContestAnnouncement' : 'deleteAnnouncement'
-          api[funcName](announcementId).then(res => {
+          api.deleteCourseAnnouncement(announcementId).then(res => {
             this.loading = true
             this.init()
           })

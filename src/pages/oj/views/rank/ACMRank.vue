@@ -2,7 +2,7 @@
   <Row type="flex" justify="space-around">
     <Col :span="22">
     <Panel :padding="10">
-      <div slot="title">ACM Ranklist</div>
+      <div slot="title">排行榜</div>
       <div slot="extra">
         <Dropdown @on-click="filterByRank">
           <span>{{ranks[query.rank]}}
@@ -13,9 +13,9 @@
           </Dropdown-menu>
         </Dropdown>
       </div>
-      <div class="echarts">
+      <!-- <div class="echarts">
         <ECharts :options="options" ref="chart" auto-resize></ECharts>
-      </div>
+      </div> -->
     </Panel>
     <Table :data="dataRank" :columns="columns" :loading="loadingTable" size="large"></Table>
     <Pagination :total="total" :page-size.sync="limit" :current.sync="page"

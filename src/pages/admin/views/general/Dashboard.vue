@@ -13,18 +13,18 @@
         </el-row>
         <hr/>
         <div class="last-info">
-          <p class="last-info-title">Last Login</p>
+          <p class="last-info-title">最近登录</p>
           <el-form label-width="80px" class="last-info-body">
-            <el-form-item label="Time:">
+            <el-form-item label="时间:">
               <span>{{session.last_activity | localtime}}</span>
             </el-form-item>
             <el-form-item label="IP:">
               <span>{{session.ip}}</span>
             </el-form-item>
-            <el-form-item label="OS">
+            <el-form-item label="操作系统:">
               <span>{{os}}</span>
             </el-form-item>
-            <el-form-item label="Browser:">
+            <el-form-item label="浏览器:">
               <span>{{browser}}</span>
             </el-form-item>
           </el-form>
@@ -52,14 +52,14 @@
 
     <el-col :md="14" :lg="16" v-if="isSuperAdmin">
       <div class="info-container">
-        <info-card color="#909399" icon="el-icon-fa-users" message="Total Users" iconSize="30px" class="info-item"
+        <info-card color="#909399" icon="el-icon-fa-users" message="所有用户" iconSize="30px" class="info-item"
                    :value="infoData.user_count"></info-card>
-        <info-card color="#67C23A" icon="el-icon-fa-list" message="Today Submissions" class="info-item"
+        <info-card color="#67C23A" icon="el-icon-fa-list" message="今日提交数" class="info-item"
                    :value="infoData.today_submission_count"></info-card>
-        <info-card color="#409EFF" icon="el-icon-fa-trophy" message="Recent Contests" class="info-item"
+        <info-card color="#409EFF" icon="el-icon-fa-trophy" message="当前竞赛数" class="info-item"
                    :value="infoData.recent_contest_count"></info-card>
       </div>
-      <panel style="margin-top: 5px">
+      <!-- <panel style="margin-top: 5px">
         <span slot="title" v-loading="loadingReleases">Release Notes
         <el-popover placement="right" trigger="hover">
           <i slot="reference" class="el-icon-fa-question-circle import-user-icon"></i>
@@ -87,7 +87,7 @@
             </div>
           </el-collapse-item>
         </el-collapse>
-      </panel>
+      </panel> -->
     </el-col>
   </el-row>
 </template>

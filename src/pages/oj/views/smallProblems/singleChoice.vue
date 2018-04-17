@@ -1,13 +1,16 @@
 <template>
 	<div class="test">
 		<div class="problem-container">
-			{{problem.content}}
-      <div class="option" :class="{selected: answers === index, 'error-select': my_status === SMALL_PROBLEM_STATUS.ERROR}" v-for="(option, index) in problem.options" @click="selectAnswer(index)">
+			<div v-html="problem.description"></div>
+      <div class="option" 
+      :class="{selected: answers === optionsArr[index], 'error-select': my_status === SMALL_PROBLEM_STATUS.ERROR}" 
+      v-for="(option, index) in problem.options" 
+      @click="selectAnswer(optionsArr[index])">
         <span class="option-letter">{{optionsArr[index]}}</span>
         {{option}}
       </div>
 		</div>
-		<Button v-if="my_status === SMALL_PROBLEM_STATUS.NOT_ANSWER" 
+		<Button v-if="my_status === SMALL_PROBLEM_STATUS.NOT_ANSWER || my_status === undefined" 
     type="primary" long 
     @click="submitAnswer" 
     :disabled="problemSubmitDisabled" 
@@ -15,7 +18,7 @@
     <!-- 不是测验且要登录且非未答题状态则显示 答题后不显示 -->
     <div v-else-if="isAuthenticated && !isExamination" :class="{'answer-true': my_status === SMALL_PROBLEM_STATUS.RIGHT, 'answer-false': my_status === SMALL_PROBLEM_STATUS.ERROR}">
       <span>正确答案是: &nbsp;</span>
-      <span class="ans">{{optionsArr[modelAnswers]}}</span>
+      <span class="ans">{{modelAnswers}}</span>
       <span class="result" v-if="my_status === SMALL_PROBLEM_STATUS.RIGHT">你做对了</span>
       <span class="result" v-else>你做错了</span>
     </div>
@@ -36,7 +39,7 @@
       return {
         // 提交的答案
         answers: SMALL_PROBLEM_STATUS.NOT_ANSWER,
-        optionsArr: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+        optionsArr: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'],
         loading: false,
         // 正确答案
         modelAnswers: '',
@@ -44,7 +47,7 @@
         // 路由名
         routeName: '',
         SMALL_PROBLEM_STATUS: SMALL_PROBLEM_STATUS,
-        my_status: '-1'
+        my_status: -1
       }
     },
     mounted () {
@@ -52,27 +55,16 @@
     },
     methods: {
       init () {
-        // 测试
-        // this.problem = {
-        //   test: '选择测试',
-        //   _id: 'id',
-        //   title: '单选题',
-        //   content: '这是一道选择题，请选择',
-        //   options: ['1', 'yes', 'no', '其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错其实都错'],
-        //   type: '0', // 0为单选题 1多选题 2为填空题
-        //   my_answers: '1',
-        //   my_status: '1',
-        //   modelAnswers: '0'
-        // }
-        // 获取当前问题的答题状态
-        this.getMy_status()
-        // 若登录且已答过题 则将自己的答案补充上去
+        // 获取答题的状态
+        console.log(this.problem)
+        this.my_status = this.problem.my_status === null ? -1 : this.problem.my_status
+        // 若登录且已答过题 则将自己的答案补充上去 答案的类型为数组
         if (this.isAuthenticated && (this.my_status === SMALL_PROBLEM_STATUS.RIGHT || this.my_status === SMALL_PROBLEM_STATUS.ERROR)) {
-          this.answers = parseInt(this.problem.my_answers)
+          // 由于返回的答案类型是数组 所以需要进行取值
+          this.answers = this.problem.my_answer[0]
         }
-        // this.answers = this.problem.my_answers
         // 正确答案 赋值
-        this.modelAnswers = parseInt(this.problem.modelAnswers)
+        this.modelAnswers = this.problem.answer[0]
         this.routeName = this.$route.name
         if (this.routeName === 'test-details') {
             // 如果是课堂测验 某个测验里面
@@ -83,26 +75,28 @@
         }
         // 若只是在题库中 则不用操作
       },
-      selectAnswer (index) {
+      selectAnswer (letter) {
         // 若已答题 则无法点击
         if (this.my_status !== SMALL_PROBLEM_STATUS.NOT_ANSWER) {
           return false
         }
-        if (this.answers === index) {
-          this.answers = -1
+        if (this.answers === letter) {
+          this.answers = '-1'
         } else {
-          this.answers = index
+          this.answers = letter
         }
       },
       submitAnswer () {
-        if (this.answers === -1) {
+        if (this.answers === '-1') {
           this.$info('还没有填写答案呢')
           return false
         } else {
           this.loading = true
+          let ans = []
+          ans.push(this.answers)
           let data = {
-            problem_id: this.problem.id,
-            answer: this.answers
+            id: this.problem.id,
+            my_answer: ans
           }
           // 判断是否是测验页面并添加测验的id
           if (this.routeName === 'test-details') {
@@ -113,21 +107,16 @@
           api.submitSmallProblem(data).then(res => {
             this.$success('提交成功')
             this.loading = false
-            this.$emit('on-close')
+            // 将答题结果赋值给my_status
+            console.log(res.data.data)
+            this.my_status = res.data.data.my_status
+            this.$emit('succeed')
           }, res => {
-            this.$error('提交失败')
+            this.$error('提交失败,请重试')
             this.loading = false
+          }).catch((err) => {
+            console.log(err)
           })
-        }
-      },
-      getMy_status () {
-        let status = this.problem.my_status
-        if (status === null || status === undefined) {
-          // -1结果为未答题状态
-          this.my_status = SMALL_PROBLEM_STATUS.NOT_ANSWER
-        } else {
-          // 设0为回答正确 1为回答错误
-          this.my_status = status
         }
       }
     },

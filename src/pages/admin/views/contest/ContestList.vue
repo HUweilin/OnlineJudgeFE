@@ -1,11 +1,11 @@
 <template>
   <div class="view">
-    <Panel title="Contest List">
+    <Panel title="竞赛列表">
       <div slot="header">
         <el-input
           v-model="keyword"
           prefix-icon="el-icon-search"
-          placeholder="Keywords">
+          placeholder="关键词">
         </el-input>
       </div>
       <el-table
@@ -16,30 +16,30 @@
         style="width: 100%">
         <el-table-column type="expand">
           <template slot-scope="props">
-            <p>Start Time: {{props.row.start_time | localtime }}</p>
-            <p>End Time: {{props.row.end_time | localtime }}</p>
-            <p>Create Time: {{props.row.create_time | localtime}}</p>
-            <p>Creator: {{props.row.created_by.username}}</p>
+            <p>开始时间: {{props.row.start_time | localtime }}</p>
+            <p>结束时间: {{props.row.end_time | localtime }}</p>
+            <p>创建时间: {{props.row.create_time | localtime}}</p>
+            <p>创建者: {{props.row.created_by.username}}</p>
           </template>
         </el-table-column>
         <el-table-column
           prop="id"
           width="80"
-          label="ID">
+          label="编号">
         </el-table-column>
         <el-table-column
           prop="title"
-          label="Title">
+          label="标题">
         </el-table-column>
         <el-table-column
-          label="Rule Type"
+          label="规则类型"
           width="130">
           <template slot-scope="scope">
             <el-tag type="gray">{{scope.row.rule_type}}</el-tag>
           </template>
         </el-table-column>
         <el-table-column
-          label="Contest Type"
+          label="竞赛类型"
           width="180">
           <template slot-scope="scope">
             <el-tag :type="scope.row.contest_type === 'Public' ? 'success' : 'primary'">
@@ -48,7 +48,7 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="Status"
+          label="当前状态"
           width="130">
           <template slot-scope="scope">
             <el-tag
@@ -59,7 +59,7 @@
         </el-table-column>
         <el-table-column
           width="100"
-          label="Visible">
+          label="是否可见">
           <template slot-scope="scope">
             <el-switch v-model="scope.row.visible"
                        active-text=""
@@ -71,11 +71,11 @@
         <el-table-column
           fixed="right"
           width="200"
-          label="Operation">
+          label="操作">
           <div slot-scope="scope">
-            <icon-btn name="Edit" icon="edit" @click.native="goEdit(scope.row.id)"></icon-btn>
-            <icon-btn name="Problem" icon="list-ol" @click.native="goContestProblemList(scope.row.id)"></icon-btn>
-            <icon-btn name="Announcement" icon="info-circle"
+            <icon-btn name="修改" icon="edit" @click.native="goEdit(scope.row.id)"></icon-btn>
+            <icon-btn name="题目" icon="list-ol" @click.native="goContestProblemList(scope.row.id)"></icon-btn>
+            <icon-btn name="公告" icon="info-circle"
                       @click.native="goContestAnnouncement(scope.row.id)"></icon-btn>
           </div>
         </el-table-column>

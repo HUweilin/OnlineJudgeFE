@@ -146,17 +146,17 @@ export default {
         params[element] = searchParams[element]
       }
     })
-    return ajax('smallProblem', 'get', {
+    return ajax('small_problem', 'get', {
       params: params
     })
   },
   getSmallProblemTagList () {
-    return ajax('smallProblem/tags', 'get')
+    return ajax('small_problem/tags', 'get')
   },
   getSmallProblem (problemID) {
-    return ajax('smallproblem', 'get', {
+    return ajax('small_problem', 'get', {
       params: {
-        problem_id: problemID
+        small_problem_id: problemID
       }
     })
   },
