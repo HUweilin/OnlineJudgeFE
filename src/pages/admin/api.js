@@ -399,6 +399,33 @@ export default {
     return ajax('admin/course/member', 'post', {
       data
     })
+  },
+  // 课程单元模块
+  // 获取单元列表
+  getCourseUnitList (id) {
+    return ajax('admin/course/task', 'get', {
+      params: {
+        course_id: id
+      }
+    })
+  },
+  // 创建新单元
+  createCourseUnit (data) {
+    return ajax('admin/course/task', 'post', {
+      data
+    })
+  },
+  // 获取单元习题列表
+  getUnitProblemList (params) {
+    return ajax('admin/course/task_problem', 'get', {
+      params
+    })
+  },
+  // 获取单元设置信息
+  getUnitSetting (params) {
+    return ajax('admin/course/task', 'get', {
+      params
+    })
   }
 }
 

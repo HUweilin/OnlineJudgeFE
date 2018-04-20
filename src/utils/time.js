@@ -21,8 +21,11 @@ function secondFormat (seconds) {
   return m.hours() + ':' + m.minutes() + ':' + m.seconds()
 }
 
-// 后台添加课程时计算开始时间至结束时间的持续时间
-function courseDurationTime (startTime, endTime) {
+// 后台添加课程或者课程单元时计算开始时间至结束时间的持续时间
+function durationTime (startTime, endTime) {
+  // moment的参数不能是'',否则会是NaN
+  startTime = startTime || undefined
+  endTime = endTime || undefined
   let start = moment(startTime)
   let end = moment(endTime)
   let diff = end.diff(start, 'seconds')
@@ -46,5 +49,5 @@ export default {
   utcToLocal: utcToLocal,
   duration: duration,
   secondFormat: secondFormat,
-  courseDurationTime: courseDurationTime
+  durationTime: durationTime
 }

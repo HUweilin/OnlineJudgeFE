@@ -58,7 +58,7 @@
         	  <el-button size="small" type="primary">选择文件</el-button>
         	</el-upload>
           <br />
-          <el-button size="small" round type="primary" @click="uploadData">确定创建</el-button>
+          <el-button size="small" round type="primary" @click="uploadData" v-if="uploadStu.length">确定创建</el-button>
         </div>
         <div class="table">
           <div class="add-row">
@@ -71,7 +71,7 @@
             <el-button size="small" type="primary" @click="addUploadStu">添加</el-button>
             <el-button size="small" type="danger" @click="emptyUploadStu">清空表格</el-button>
           </div>
-          <div class="data-error" v-if="dataError">邮箱、姓名只能小于 20 位,由数字和字母组成，均不能为空</div>
+          <div class="data-error" v-if="dataError">邮箱、姓名只能小于 20 位,均不能为空</div>
           <el-table :data="uploadStu" border>
             <el-table-column label="序号" width="50" type="index" :index="indexMethod"></el-table-column>
             <el-table-column align="center" label="姓名" width="150" prop="username"></el-table-column>
@@ -129,7 +129,7 @@
         this.loading = true
         api.getCourseMember(this.courseID).then(res => {
           this.loading = false
-          this.students = res.data.data
+          this.students = res.data.data.results
           // 分割数据进行展示
           this.setDisplayStudents()
         }, res => {
@@ -234,8 +234,7 @@
       // 手动添加信息到uploadStu
       addUploadStu () {
         let emailReg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
-        let nameReg = /^.{1, 20}$/
-        if (!emailReg.test(this.addStu.email) && !nameReg.test(this.addStu.username)) {
+        if (!emailReg.test(this.addStu.email) || this.addStu.username === '') {
           this.dataError = true
           return
         }

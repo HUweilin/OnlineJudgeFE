@@ -302,7 +302,7 @@
       'course.start_time' (newDate) {
         // 若结束时间有值则进行计算，否则仍为无限
         if (this.course.end_time !== '') {
-          let result = time.courseDurationTime(newDate, this.course.end_time)
+          let result = time.durationTime(newDate, this.course.end_time)
           if (result === false) {
             // 说明持续时间为负数，错误
             this.isShowDuration = true
@@ -314,7 +314,7 @@
       },
       'course.end_time' (newDate) {
         if (newDate) {
-          let result = time.courseDurationTime(this.course.start_time, newDate)
+          let result = time.durationTime(this.course.start_time, newDate)
           if (result === false) {
             // 说明持续时间为负数，错误
             this.isShowDuration = true

@@ -167,7 +167,7 @@ export default new VueRouter({
             },
             {
               path: 'units',
-              name: 'course-unit',
+              name: 'course-unit-list',
               component: Course.UnitList
             },
             {

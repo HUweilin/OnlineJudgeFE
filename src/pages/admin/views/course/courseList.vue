@@ -105,7 +105,7 @@
       },
       // 跳转课程单元
       goCourseUnit (id) {
-        this.$router.push({name: 'course-unit', params: {courseId: id}})
+        this.$router.push({name: 'course-unit-list', params: {courseId: id}})
       },
       // 跳转课程公告
       goCourseAnnouncement (id) {
