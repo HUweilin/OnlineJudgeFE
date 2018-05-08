@@ -18,11 +18,19 @@
         <el-table-column
           width="100"
           prop="id"
-          label="编号">
+          label="编号" align="center">
+        </el-table-column>
+        <el-table-column width="80" prop="_id" label="展示编号" align="center">
+          <template slot-scope="{row}">
+            <span v-show="!row.isEditing">{{row._id}}</span>
+            <el-input v-show="row.isEditing" v-model="row._id"
+                      @keyup.enter.native="handleInlineEdit(row)">
+            </el-input>
+          </template>
         </el-table-column>
         <el-table-column
           prop="title"
-          label="标题">
+          label="标题" align="center">
           <template slot-scope="{row}">
             <span v-show="!row.isEditing">{{row.title}}</span>
             <el-input v-show="row.isEditing" v-model="row.title"
@@ -30,14 +38,19 @@
             </el-input>
           </template>
         </el-table-column>
+        <el-table-column label="类型" align="center">
+          <template slot-scope="scope">
+            <span>{{SMALL_PROBLEM_TYPE[scope.row.type].name}}</span>
+          </template>
+        </el-table-column>
         <el-table-column
           prop="created_by.username"
-          label="创建者">
+          label="创建者" align="center">
         </el-table-column>
         <el-table-column
           width="200"
           prop="create_time"
-          label="创建时间">
+          label="创建时间" align="center">
           <template slot-scope="scope">
             {{scope.row.create_time | localtime }}
           </template>
@@ -45,7 +58,7 @@
         <el-table-column
           width="100"
           prop="visible"
-          label="是否可见">
+          label="是否可见" align="center">
           <template slot-scope="scope">
             <el-switch v-model="scope.row.visible"
                        active-text=""
@@ -57,7 +70,7 @@
         <el-table-column
           fixed="right"
           label="操作"
-          width="250">
+          width="250" align="center">
           <div slot-scope="scope">
             <icon-btn name="修改" icon="edit" @click.native="goEdit(scope.row.id)"></icon-btn>
             <!-- <icon-btn v-if="contestId" name="添加到公共题目" icon="clone"
@@ -101,7 +114,7 @@
 <script>
   import api from '../../api.js'
   import utils from '@/utils/utils'
-
+  import { SMALL_PROBLEM_TYPE } from '@/utils/constants'
   export default {
     name: 'smallProblemList',
     data () {
@@ -119,7 +132,8 @@
         currentRow: {},
         InlineEditDialogVisible: false,
         makePublicDialogVisible: false,
-        addProblemDialogVisible: false
+        addProblemDialogVisible: false,
+        SMALL_PROBLEM_TYPE: SMALL_PROBLEM_TYPE
       }
     },
     mounted () {

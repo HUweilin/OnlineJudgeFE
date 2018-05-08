@@ -236,6 +236,7 @@ export default {
       }
     })
   },
+  // 获取编程题题库
   getProblemList (params) {
     params = utils.filterEmptyValue(params)
     return ajax('admin/problem', 'get', {
@@ -354,6 +355,14 @@ export default {
       }
     })
   },
+  // 删除某个课程
+  deleteCourse (id) {
+    return ajax('admin/course', 'delete', {
+      params: {
+        id
+      }
+    })
+  },
   // 课程公告部分
   getCourseAnnouncementList (id) {
     return ajax('admin/course/announcement', 'get', {
@@ -390,7 +399,7 @@ export default {
   },
   // 删除课程学生信息
   deleteCourseMember (data) {
-    return ajax('admin/course/member', 'delete', {
+    return ajax('admin/course/member', 'put', {
       data
     })
   },
@@ -415,10 +424,58 @@ export default {
       data
     })
   },
-  // 获取单元习题列表
+  // 删除单元
+  deleteCourseUnit (params) {
+    return ajax('admin/course/task', 'delete', {
+      params
+    })
+  },
+  // 修改单元信息
+  editCourseUnit (data) {
+    return ajax('admin/course/task', 'put', {
+      data
+    })
+  },
+  // 获取单元习题列表 参数为course_id和task_id
   getUnitProblemList (params) {
     return ajax('admin/course/task_problem', 'get', {
       params
+    })
+  },
+  // 添加题库的题
+  addUnitProblemFromPublic (data) {
+    return ajax('admin/course/task/add_problem_from_public', 'post', {
+      data
+    })
+  },
+  // 创建单元编程题的信息
+  createUnitProblem (data) {
+    return ajax('admin/course/task/problem', 'post', {
+      data
+    })
+  },
+  // 修改单元编程题的信息
+  editUnitProblem (data) {
+    return ajax('admin/course/task/problem', 'put', {
+      data
+    })
+  },
+  // 创建单元小题的信息
+  createUnitSmallProblem (data) {
+    return ajax('admin/course/task/small_problem', 'post', {
+      data
+    })
+  },
+  // 修改单元小题的信息
+  editUnitSmallProblem (data) {
+    return ajax('admin/course/task/small_problem', 'put', {
+      data
+    })
+  },
+  // 删除单元某个习题
+  deleteUnitProblem (data) {
+    return ajax('admin/course/task_problem', 'put', {
+      data
     })
   },
   // 获取单元设置信息

@@ -22,7 +22,7 @@
         </el-table-column>
         <el-table-column
           width="150"
-          label="显示编号">
+          label="展示编号">
           <template slot-scope="{row}">
             <span v-show="!row.isEditing">{{row._id}}</span>
             <el-input v-show="row.isEditing" v-model="row._id"
@@ -97,10 +97,9 @@
         </el-pagination>
       </div>
     </Panel>
-    <el-dialog title="确认更新该题目? "
-               width="20%"
-               :visible.sync="InlineEditDialogVisible"
-               @close-on-click-modal="false">
+    <el-dialog title="确认更新该题目? " width="20%" 
+      :visible.sync="InlineEditDialogVisible"
+      @close-on-click-modal="false">
       <div>
         <p>展示编号: {{currentRow._id}}</p>
         <p>标题: {{currentRow.title}}</p>
@@ -114,7 +113,7 @@
                v-if="contestId"
                width="80%"
                :visible.sync="addProblemDialogVisible"
-               @close-on-click-modal="false">
+               :close-on-click-modal="false">
       <add-problem-component :contestID="contestId" @on-change="getProblemList"></add-problem-component>
     </el-dialog>
   </div>

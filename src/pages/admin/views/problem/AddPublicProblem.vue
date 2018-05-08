@@ -75,7 +75,7 @@
         })
       },
       handleAddProblem (problemID) {
-        this.$prompt('请给竞赛题目输入展示编号', '确认').then(({value}) => {
+        this.$prompt('请给竞赛题目输入展示编号', '提示').then(({value}) => {
           let data = {
             problem_id: problemID,
             contest_id: this.contestID,

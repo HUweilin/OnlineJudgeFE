@@ -1,14 +1,14 @@
 <template>
   <panel shadow>
-    <div slot="title">ACM Helper</div>
+    <div slot="title">ACM 助手</div>
     <div slot="extra">
       <ul class="filter">
         <li>
-          Auto Refresh(10s)
+          自动刷新(10s)
           <i-switch style="margin-left: 5px;" @on-change="handleAutoRefresh"></i-switch>
         </li>
         <li>
-          <Button type="info" @click="getACInfo">Refresh</Button>
+          <Button type="info" @click="getACInfo">刷新</Button>
         </li>
       </ul>
     </div>
@@ -40,16 +40,16 @@
         loadingTable: false,
         columns: [
           {
-            title: 'AC Time',
+            title: 'AC时间',
             key: 'ac_time'
           },
           {
-            title: 'ProblemID',
+            title: '题目编号',
             align: 'center',
             key: 'problem_display_id'
           },
           {
-            title: 'First Blood',
+            title: '首次提交通过',
             align: 'center',
             render: (h, {row}) => {
               if (row.ac_info.is_first_ac) {
@@ -64,7 +64,7 @@
             }
           },
           {
-            title: 'Username',
+            title: '用户名',
             align: 'center',
             render: (h, {row}) => {
               return h('a', {
@@ -84,7 +84,7 @@
             }
           },
           {
-            title: 'RealName',
+            title: '真实姓名',
             align: 'center',
             render: (h, {row}) => {
               return h('span', {
@@ -96,7 +96,7 @@
             }
           },
           {
-            title: 'Status',
+            title: '状态',
             align: 'center',
             render: (h, {row}) => {
               return h('Tag', {
@@ -107,7 +107,7 @@
             }
           },
           {
-            title: 'Option',
+            title: '操作',
             fixed: 'right',
             align: 'center',
             width: 100,
@@ -124,7 +124,7 @@
                     this.updateCheckedStatus(row)
                   }
                 }
-              }, 'Check It')
+              }, '校验')
             }
           }
         ],

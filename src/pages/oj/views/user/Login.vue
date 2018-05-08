@@ -2,12 +2,12 @@
   <div>
     <Form ref="formLogin" :model="formLogin" :rules="ruleLogin">
       <FormItem prop="username">
-        <Input type="text" v-model="formLogin.username" placeholder="Username" size="large" @on-enter="handleLogin">
+        <Input type="text" v-model="formLogin.username" placeholder="用户名" size="large" @on-enter="handleLogin">
         <Icon type="ios-person-outline" slot="prepend"></Icon>
         </Input>
       </FormItem>
       <FormItem prop="password">
-        <Input type="password" v-model="formLogin.password" placeholder="Password" size="large" @on-enter="handleLogin">
+        <Input type="password" v-model="formLogin.password" placeholder="密码" size="large" @on-enter="handleLogin">
         <Icon type="ios-locked-outline" slot="prepend"></Icon>
         </Input>
       </FormItem>

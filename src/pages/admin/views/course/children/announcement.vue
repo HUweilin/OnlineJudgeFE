@@ -11,7 +11,7 @@
           <el-table-column
             width="100"
             prop="id"
-            label="编号">
+            label="编号" align="center">
           </el-table-column>
           <el-table-column
             prop="title"
@@ -19,26 +19,26 @@
           </el-table-column>
           <el-table-column
             prop="create_time"
-            label="创建时间">
+            label="创建时间" align="center" width="150">
             <template slot-scope="scope">
               {{ scope.row.create_time | localtime }}
             </template>
           </el-table-column>
           <el-table-column
             prop="last_update_time"
-            label="最近更新时间">
+            label="最近更新时间" align="center" width="150">
             <template slot-scope="scope">
               {{scope.row.last_update_time | localtime }}
             </template>
           </el-table-column>
           <el-table-column
             prop="created_by.username"
-            label="创建者">
+            label="创建者" align="center">
           </el-table-column>
           <el-table-column
             width="100"
             prop="visible"
-            label="是否可见">
+            label="是否可见" align="center">
             <template slot-scope="scope">
               <el-switch v-model="scope.row.visible"
                          active-text=""
@@ -50,7 +50,7 @@
           <el-table-column
             fixed="right"
             label="操作"
-            width="200">
+            width="200" align="center">
             <div slot-scope="scope">
               <icon-btn name="修改" icon="edit" @click.native="openAnnouncementDialog(scope.row.id)"></icon-btn>
               <icon-btn name="删除" icon="trash" @click.native="deleteAnnouncement(scope.row.id)"></icon-btn>

@@ -12,7 +12,7 @@
           <button class="navbar-toggle click-me collapsed" data-toggle="collapse" data-target="#my-top-nav" aria-expanded="false" @click="removeClass('my-bottom-nav')">
             <img src="/public/avatar/default.png" />
           </button>
-          <div class="navbar-brand hidden-xs"><img class="logo" src="../../../assets/logo.png"><span class="title">数科院在线判题系统</span></div>
+          <div class="navbar-brand hidden-xs"><img class="logo" src="../../../assets/logo.png"><span class="title">{{website.website_name}}</span></div>
         </div>
         <div ref="my-top-nav" id="my-top-nav" class="collapse navbar-collapse" @click="removeClass('my-top-nav',$event)">
           <template v-if="!isAuthenticated">
@@ -70,37 +70,24 @@
                 状态
               </Menu-item>
               <Menu-item name="/acm-rank">
-                排行榜
+                ACM 排行
+              </Menu-item>
+              <Menu-item name="/oi-rank">
+                OI 排行
               </Menu-item>
             </Submenu>
             <Menu-item name="/contests" class="ivu-col ivu-col-span-sm-3">
               <Icon type="trophy"></Icon>
               竞赛
             </Menu-item>
-            <Submenu name="" class="ivu-col ivu-col-span-sm-4 ivu-col-span-md-3">
-              <template slot="title">
-                <Icon type="podium"></Icon>
-                课堂测验
-              </template>
-              <Menu-item name="/tests">
-                课堂训练
-              </Menu-item>
-              <Menu-item name="/homeworkList">
-                课后作业
-              </Menu-item>
-            </Submenu>
-            <Submenu name="" class="ivu-col ivu-col-span-sm-4 ivu-col-span-md-3">
-              <template slot="title">
-                <Icon type="information-circled"></Icon>
-                关于
-              </template>
-              <Menu-item name="/about">
-                Judger
-              </Menu-item>
-              <Menu-item name="/FAQ">
-                FAQ
-              </Menu-item>
-            </Submenu>
+            <Menu-item name="/courses" class="ivu-col ivu-col-span-sm-4 ivu-col-span-md-3">
+              <Icon type="ios-book"></Icon>
+              我的课程
+            </Menu-item>
+            <Menu-item name="/about" class="ivu-col ivu-col-span-sm-4 ivu-col-span-md-3">
+              <Icon type="information-circled"></Icon>
+              关于
+            </Menu-item>
           </Menu>
           <!-- 小屏幕菜单 -->
           <Row class="is-hidden">
@@ -118,42 +105,31 @@
                 <Menu-item name="/problems">
                   编程训练
                 </Menu-item>
-                <Menu-item name="/problems">
+                <Menu-item name="/smallProblems">
                   小题训练
+                </Menu-item>
+                <Menu-item name="/status">
+                  状态
+                </Menu-item>
+                <Menu-item name="/acm-rank">
+                  ACM 排行
+                </Menu-item>
+                <Menu-item name="/oi-rank">
+                  OI 排行
                 </Menu-item>
               </Submenu>
               <Menu-item name="/contests">
                 <Icon type="trophy"></Icon>
                 竞赛
               </Menu-item>
-              <Menu-item name="/status">
-                <Icon type="ios-pulse-strong"></Icon>
-                状态
+              <Menu-item name="/courses">
+                <Icon type="ios-book"></Icon>
+                我的课程
               </Menu-item>
-              <Submenu name="">
-                <template slot="title">
-                  <Icon type="podium"></Icon>
-                  比例
-                </template>
-                <Menu-item name="/acm-rank">
-                  ACM 比例
-                </Menu-item>
-                <Menu-item name="/oi-rank">
-                  OI 比例
-                </Menu-item>
-              </Submenu>
-              <Submenu name="">
-                <template slot="title">
-                  <Icon type="information-circled"></Icon>
-                  关于
-                </template>
-                <Menu-item name="/about">
-                  Judger
-                </Menu-item>
-                <Menu-item name="/FAQ">
-                  FAQ
-                </Menu-item>
-              </Submenu>
+              <Menu-item name="/about">
+                <Icon type="information-circled"></Icon>
+                关于我们
+              </Menu-item>
             </Menu>
             </Col>
           </Row>
@@ -220,7 +196,6 @@
           return this.modalStatus.visible
         },
         set (value) {
-          // console.log(value, 1)
           this.changeModalStatus({visible: value})
         }
       }
@@ -247,7 +222,7 @@
             display: inline-block;
             height: 50px;
             vertical-align: middle;
-            margin: 0 20px;
+            margin: 0 0 0 20px;
           }
           .title {
             margin-left: 10px;

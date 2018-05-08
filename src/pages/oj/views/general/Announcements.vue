@@ -23,7 +23,7 @@
             </div>
           </li>
         </ul>
-        <Pagination v-if="!isContest"
+        <Pagination v-if="!isContest && !isCourse"
                     key="page"
                     :total="total"
                     :page-size="limit"
@@ -64,6 +64,8 @@
       init () {
         if (this.isContest) {
           this.getContestAnnouncementList()
+        } else if (this.isCourse) {
+          this.getCourseAnnouncementList()
         } else {
           this.getAnnouncementList()
         }
@@ -82,9 +84,20 @@
           this.btnLoading = false
         })
       },
+      // 获取竞赛公告列表
       getContestAnnouncementList () {
         this.btnLoading = true
         api.getContestAnnouncementList(this.$route.params.contestID).then(res => {
+          this.btnLoading = false
+          this.announcements = res.data.data
+        }, () => {
+          this.btnLoading = false
+        })
+      },
+      // 获取课程公告列表
+      getCourseAnnouncementList () {
+        this.btnLoading = true
+        api.getCourseAnnouncementList(this.$route.params.courseID).then(res => {
           this.btnLoading = false
           this.announcements = res.data.data
         }, () => {
@@ -115,6 +128,9 @@
       },
       isContest () {
         return !!this.$route.params.contestID
+      },
+      isCourse () {
+        return !!this.$route.params.courseID
       }
     }
   }

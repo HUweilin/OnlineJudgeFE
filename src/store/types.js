@@ -25,9 +25,11 @@ export default keyMirror({
   'CLEAR_CONTEST': null,
 
   // 'EXAM_NOW': null,
-  'EXAMINATION_ACCESS': null,
-  'CHANGE_EXAMINATION': null,
-  'CLEAR_EXAMINATION': null,
-  'CHANGE_EXAMINATION_PROBLEMS': null,
-  'CHANGE_EXAMINATION_ITEM_VISIBLE': null
+  'CHANGE_COURSE': null,
+  'CHANGE_COURSE_UNITS': null,
+  'CHANGE_UNIT': null,
+  'CLEAR_COURSE': null,
+  'CLEAR_COURSE_UNIT': null,
+  'COURSE_NOW': null,
+  'COURSE_NOW_ADD_1S': null
 })

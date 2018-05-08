@@ -161,116 +161,6 @@ export default {
     })
   },
 
-  // 获取课堂训练的列表数据
-  getTestList (offset, limit, searchParams) {
-    let params = {
-      offset,
-      limit
-    }
-    if (searchParams !== undefined) {
-      Object.keys(searchParams).forEach((element) => {
-        if (searchParams[element]) {
-          params[element] = searchParams[element]
-        }
-      })
-    }
-    return ajax('testing', 'get', {
-      params
-    })
-  },
-  getTest (id) {
-    return ajax('test', 'get', {
-      params: {
-        id
-      }
-    })
-  },
-  getTestAccess (testID) {
-    return ajax('test/access', 'get', {
-      params: {
-        test_id: testID
-      }
-    })
-  },
-  checkTestPassword (testID, password) {
-    return ajax('test/password', 'post', {
-      data: {
-        test_id: testID,
-        password
-      }
-    })
-  },
-  getTestProblemList (testID) {
-    return ajax('test/problem', 'get', {
-      params: {
-        test_id: testID
-      }
-    })
-  },
-  getTestProblem (problemID, testID) {
-    return ajax('test/problem', 'get', {
-      params: {
-        test_id: testID,
-        problem_id: problemID
-      }
-    })
-  },
-
-  // 获取课后作业的列表数据
-  getHomeworkList (offset, limit, searchParams) {
-    let params = {
-      offset,
-      limit
-    }
-    if (searchParams !== undefined) {
-      Object.keys(searchParams).forEach((element) => {
-        if (searchParams[element]) {
-          params[element] = searchParams[element]
-        }
-      })
-    }
-    return ajax('homework', 'get', {
-      params
-    })
-  },
-  getHomework (id) {
-    return ajax('homework', 'get', {
-      params: {
-        id
-      }
-    })
-  },
-  getHomeworkAccess (homeworkID) {
-    return ajax('homework/access', 'get', {
-      params: {
-        homework_id: homeworkID
-      }
-    })
-  },
-  checkHomeworkPassword (homeworkID, password) {
-    return ajax('homework/password', 'post', {
-      data: {
-        homework_id: homeworkID,
-        password
-      }
-    })
-  },
-  getHomeworkProblemList (homeworkID) {
-    return ajax('homework/problem', 'get', {
-      params: {
-        homework_id: homeworkID
-      }
-    })
-  },
-  getHomeworkProblem (problemID, homeworkID) {
-    return ajax('homework/problem', 'get', {
-      params: {
-        homework_id: homeworkID,
-        problem_id: problemID
-      }
-    })
-  },
-
   getContestList (offset, limit, searchParams) {
     let params = {
       offset,
@@ -324,7 +214,8 @@ export default {
       }
     })
   },
-  getContestProblem (problemID, contestID) {
+  getContestProblem (problemID, params) {
+    let contestID = params.contestID
     return ajax('contest/problem', 'get', {
       params: {
         contest_id: contestID,
@@ -344,6 +235,102 @@ export default {
       data
     })
   },
+
+  // 获取课程列表
+  getCourseList () {
+    return ajax('course', 'get')
+  },
+  // 获取课程信息
+  getCourse (id) {
+    return ajax('course', 'get', {
+      params: {
+        course_id: id
+      }
+    })
+  },
+  // 加入新课程
+  addNewCourse (data) {
+    return ajax('course/add', 'post', {
+      data
+    })
+  },
+  // 退出课程
+  exitCourse (id) {
+    return ajax('course/exit', 'delete', {
+      params: {
+        course_id: id
+      }
+    })
+  },
+  // 获取课程公告列表
+  getCourseAnnouncementList (courseID) {
+    return ajax('course/announcement', 'get', {
+      params: {
+        course_id: courseID
+      }
+    })
+  },
+  // 获取课程单元列表
+  getCourseUnitList (courseID) {
+    return ajax('course/task', 'get', {
+      params: {
+        course_id: courseID
+      }
+    })
+  },
+  // 获取课程单元信息 参数为task_id
+  getCourseUnit (taskID) {
+    return ajax('course/task', 'get', {
+      params: {
+        task_id: taskID
+      }
+    })
+  },
+  // 获取课程单元的习题列表 需要两个参数course_id和task_id
+  getCourseUnitProblemList (params) {
+    return ajax('course/task/problem', 'get', {
+      params
+    })
+  },
+  // 获取单元编程题
+  getUnitProblem (problemId, params) {
+    return ajax('course/task/problem', 'get', {
+      params: {
+        problem_id: problemId,
+        course_id: params.courseID,
+        task_id: params.taskID
+      }
+    })
+  },
+  // 提交编程题代码
+  submitUnitCode (data) {
+    return ajax('course/task/submit', 'post', {
+      data
+    })
+  },
+  // 获取编程题判题结果
+  getCourseSubmission (id) {
+    return ajax('course/task/submission', 'get', {
+      params: {
+        id
+      }
+    })
+  },
+  // 获取单元小题
+  getUnitSmallProblem (id) {
+    return ajax('course/task/small_problem', 'get', {
+      params: {
+        small_problem_id: id
+      }
+    })
+  },
+  // 提交单元小题
+  submitUnitSmallProblem (data) {
+    return ajax('course/task/submit_small', 'post', {
+      data
+    })
+  },
+
   getSubmissionList (offset, limit, params) {
     params.limit = limit
     params.offset = offset
@@ -355,22 +342,6 @@ export default {
     params.limit = limit
     params.offset = offset
     return ajax('contest_submissions', 'get', {
-      params
-    })
-  },
-  // 训练界面
-  getTestSubmissionList (offset, limit, params) {
-    params.limit = limit
-    params.offset = offset
-    return ajax('test_submissions', 'get', {
-      params
-    })
-  },
-  // 作业界面
-  getHomeworkSubmissionList (offset, limit, params) {
-    params.limit = limit
-    params.offset = offset
-    return ajax('homework_submissions', 'get', {
       params
     })
   },
@@ -412,18 +383,6 @@ export default {
   },
   getContestRank (params) {
     return ajax('contest_rank', 'get', {
-      params
-    })
-  },
-  // 训练界面
-  getTestRank (params) {
-    return ajax('test_rank', 'get', {
-      params
-    })
-  },
-  // 作业界面
-  getHomeworkRank (params) {
-    return ajax('homework_rank', 'get', {
       params
     })
   },

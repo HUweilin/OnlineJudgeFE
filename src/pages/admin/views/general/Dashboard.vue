@@ -30,7 +30,7 @@
           </el-form>
         </div>
       </el-card>
-      <panel title="System Overview" v-if="isSuperAdmin">
+      <panel title="系统概况" v-if="isSuperAdmin">
         <p>Judge Server:  {{infoData.judge_server_count}}</p>
         <p>HTTPS Status:
           <el-tag :type="https ? 'success' : 'danger'" size="small">

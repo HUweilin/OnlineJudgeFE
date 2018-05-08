@@ -1,22 +1,22 @@
 <template>
   <div class="course-container">
-    <Panel title="创建课程">
-      <el-form label-position="left" label-width="80px" ref="courseForm" :model="course" :rules="rules">
+    <Panel :title="courseID ? '修改设置' : '创建课程'">
+      <el-form label-position="left" label-width="80px" ref="courseForm" :model="realCourse" :rules="rules">
         <el-row :gutter="20">
           <el-col :span="24">
             <el-form-item label="课程名称" prop="title">
-              <el-input name="title" v-model="course.title" placeholder="课程名称"></el-input>
+              <el-input name="title" v-model="realCourse.title" placeholder="课程名称"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="课程介绍" prop="introduction">
-              <el-input name="introduction" type="textarea" :autosize="{ minRows: 10 }" placeholder="请输入课程介绍" v-model="course.introduction"></el-input>
+              <el-input name="introduction" type="textarea" :autosize="{ minRows: 10 }" placeholder="请输入课程介绍" v-model="realCourse.introduction"></el-input>
             </el-form-item>
           </el-col>
           <el-col :lg="3" :sm="24">
             <el-form-item label="是否可见">
               <el-switch
-              v-model="course.visible"
+              v-model="realCourse.visible"
               active-text=""
               inactive-text="">
               </el-switch>
@@ -26,7 +26,7 @@
             <el-form-item label="开始时间" prop="start_time">
               <el-date-picker 
               name="start_time"
-              v-model="course.start_time"
+              v-model="realCourse.start_time"
               type="datetime"
               placeholder="开始时间">
               </el-date-picker>
@@ -36,7 +36,7 @@
             <el-form-item label="结束时间" prop="end_time">
               <el-date-picker
               name="end_time"
-              v-model="course.end_time"
+              v-model="realCourse.end_time"
               type="datetime"
               placeholder="结束时间">
               </el-date-picker>
@@ -118,18 +118,9 @@
       vueCropper
     },
     props: {
+      // 若是某个课程的设置界面，这里就会有值
       course: {
-        type: Object,
-        default: function () {
-          return {
-            title: '',
-            introduction: '',
-            start_time: '',
-            end_time: '',
-            visible: true,
-            routeName: ''
-          }
-        }
+        type: Object
       }
     },
     data () {
@@ -155,14 +146,35 @@
         // 路由名
         routeName: '',
         // 课程id
-        courseID: ''
+        courseID: '',
+        // 真正用于显示和提交的课程变量
+        realCourse: {
+          title: '',
+          introduction: '',
+          visible: true,
+          start_time: '',
+          end_time: ''
+        }
       }
     },
     mounted () {
-      this.routeName = this.$route.name
-      this.courseID = this.$route.params.courseId
+      this.init()
     },
     methods: {
+      // 初始化
+      init () {
+        this.routeName = this.$route.name
+        this.courseID = this.$route.params.courseId
+        // 若是课程的修改设置界面 则将传过来的course属性拷贝给realCourse
+        if (this.routeName === 'course-setting') {
+          this.$nextTick(() => {
+            Object.assign(this.realCourse, this.course)
+            // 对时间格式进行更改 这里判断原因是一开始
+            this.realCourse.start_time = new Date(this.realCourse.start_time)
+            this.realCourse.end_time = new Date(this.realCourse.end_time)
+          })
+        }
+      },
       // 上传图片的类型
       checkFileType (file) {
         if (!/\.(gif|jpg|jpeg|png|bmp|GIF|JPG|PNG)$/.test(file.name)) {
@@ -234,12 +246,15 @@
             // 发送请求的路由，和携带的数据
             let url = 'admin/course'
             let form = new window.FormData(this.$refs.courseForm.$el)
-            // 日期格式设为IOS, 设置visible值
-            let visible = this.course.visible + ''
+            // 日期格式设为IOS, 设置visible值，首字母大写
+            let visible = this.realCourse.visible + ''
             let bool = visible.slice(0, 1).toUpperCase() + visible.slice(1)
             form.append('visible', bool)
-            form.set('start_time', this.course.start_time.toISOString())
-            form.set('end_time', this.course.end_time.toISOString())
+            form.set('start_time', this.realCourse.start_time.toISOString())
+            form.set('end_time', this.realCourse.end_time.toISOString())
+            // 创建也要传，后台要求, undefined不行
+            let id = this.courseID || ''
+            form.set('id', id)
             let sendObj = {
               method: 'post',
               url: url,
@@ -263,12 +278,6 @@
       },
       // 发送ajax请求
       getAjax (sendObj) {
-        if (this.routeName === 'course-setting') {
-          // 若是修改界面，则添加课程的id
-          sendObj.data.set('id', this.courseId)
-          // 将method设为put
-          sendObj.method = 'put'
-        }
         new Promise((resolve, reject) => {
           this.$http(sendObj).then(res => {
             // API正常返回(status=20x), 是否错误通过有无error判断
@@ -291,18 +300,22 @@
             this.$error(res.data.data)
           })
         }).then(res => {
-          this.$router.push({name: 'course-intro', params: {courseId: res.data.data.id}})
           this.$success('保存成功')
+          // 更新当前的course
+          if (this.routeName === 'course-setting') {
+            this.$emit('update-course')
+          }
+          this.$router.push({name: 'course-intro', params: {courseId: res.data.data.id}})
         }, res => {
           this.$error(res.data.data)
         })
       }
     },
     watch: {
-      'course.start_time' (newDate) {
+      'realCourse.start_time' (newDate) {
         // 若结束时间有值则进行计算，否则仍为无限
-        if (this.course.end_time !== '') {
-          let result = time.durationTime(newDate, this.course.end_time)
+        if (this.realCourse.end_time !== '') {
+          let result = time.durationTime(newDate, this.realCourse.end_time)
           if (result === false) {
             // 说明持续时间为负数，错误
             this.isShowDuration = true
@@ -312,9 +325,9 @@
           }
         }
       },
-      'course.end_time' (newDate) {
+      'realCourse.end_time' (newDate) {
         if (newDate) {
-          let result = time.durationTime(this.course.start_time, newDate)
+          let result = time.durationTime(this.realCourse.start_time, newDate)
           if (result === false) {
             // 说明持续时间为负数，错误
             this.isShowDuration = true
@@ -325,6 +338,10 @@
         } else {
           this.courseDuration = '无限'
         }
+      },
+      // 若发生变化，则说明是课程设置界面
+      'course' () {
+        this.init()
       }
     },
     computed: {

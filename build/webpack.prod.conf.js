@@ -86,7 +86,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
-    // oj
+    // oj前台模块
     new HtmlWebpackPlugin({
       filename: config.build.ojIndex,
       template: config.build.ojTemplate,
@@ -100,7 +100,7 @@ const webpackConfig = merge(baseWebpackConfig, {
         // https://github.com/kangax/html-minifier#options-quick-reference
       }
     }),
-    // admin
+    // admin后台模块
     new HtmlWebpackPlugin({
       filename: config.build.adminIndex,
       template: config.build.adminTemplate,

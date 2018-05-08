@@ -68,7 +68,7 @@
         <VerticalMenu-item v-if="showAdminHelper"
                            :route="{name: 'acm-helper', params: {contestID: contestID}}">
           <Icon type="ios-paw"></Icon>
-          Admin Helper
+          管理助手
         </VerticalMenu-item>
       </VerticalMenu>
     </div>

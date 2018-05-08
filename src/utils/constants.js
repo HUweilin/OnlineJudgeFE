@@ -97,13 +97,49 @@ export const CONTEST_STATUS_REVERSE = {
   }
 }
 
-export const EXAMINATION_STATUS = {
+// 小题的回答情况 -1: 未回答 0: 回答正确 1: 回答错误
+export const SMALL_PROBLEM_STATUS = {
+  'NOT_ANSWER': -1,
+  'RIGHT': 0,
+  'ERROR': 1
+}
+
+// 小题类型 Single单选题 Multiple为多选题 Blank为填空题
+export const SMALL_PROBLEM_TYPE = {
+  Single: {
+    name: '单选题',
+    value: 'Single'
+  },
+  Multiple: {
+    name: '多选题',
+    value: 'Multiple'
+  },
+  Blank: {
+    name: '填空题',
+    value: 'Blank'
+  }
+}
+
+// 课程单元类型
+// export const COURSE_UNIT_TYPE = {
+//   task: {
+//     name: '作业',
+//     value: 'task'
+//   },
+//   practice: {
+//     name: '练习',
+//     value: 'practice'
+//   }
+// }
+
+// 课程状态
+export const COURSE_STATUS = {
   'NOT_START': '1',
   'UNDERWAY': '0',
   'ENDED': '-1'
 }
 
-export const EXAMINATION_STATUS_REVERSE = {
+export const COURSE_STATUS_REVERSE = {
   '1': {
     name: '等待',
     color: 'yellow'
@@ -118,20 +154,6 @@ export const EXAMINATION_STATUS_REVERSE = {
   }
 }
 
-// 小题的回答情况 -1: 未回答 0: 回答正确 1: 回答错误
-export const SMALL_PROBLEM_STATUS = {
-  'NOT_ANSWER': -1,
-  'RIGHT': 0,
-  'ERROR': 1
-}
-
-// 小题类型 Single单选题 Multiple为多选题 Blank为填空题
-export const SMALL_PROBLEM_TYPE = {
-  Single: 'Single',
-  Multiple: 'Multiple',
-  Blank: 'Blank'
-}
-
 export const RULE_TYPE = {
   ACM: 'ACM',
   OI: 'OI'
@@ -139,11 +161,6 @@ export const RULE_TYPE = {
 
 export const CONTEST_TYPE = {
   PUBLIC: 'Public',
-  PRIVATE: 'Password Protected'
-}
-
-export const EXAMINATION_TYPE = {
-  PBULIC: 'public',
   PRIVATE: 'Password Protected'
 }
 
@@ -165,6 +182,7 @@ export const STORAGE_KEY = {
   languages: 'languages'
 }
 
+// 竞赛和题库编程题答题的内容存储
 export function buildProblemCodeKey (problemID, contestID = null) {
   if (contestID) {
     return `${STORAGE_KEY.PROBLEM_CODE}_${contestID}_${problemID}`
@@ -172,10 +190,7 @@ export function buildProblemCodeKey (problemID, contestID = null) {
   return `${STORAGE_KEY.PROBLEM_CODE}_NaN_${problemID}`
 }
 
-export function buildTestProblemCodeKey (problemID, testID) {
-  return `${STORAGE_KEY.PROBLEM_CODE}_${testID}_${problemID}`
-}
-
-export function buildHomeworkProblemCodeKey (problemID, homeworkID) {
-  return `${STORAGE_KEY.PROBLEM_CODE}_${homeworkID}_${problemID}`
+// 课程的题目编程题答题的内容存储
+export function buildCourseProblemCodeKey (problemID, courseID, unitID) {
+  return `${STORAGE_KEY.PROBLEM_CODE}_${courseID}_${unitID}_${problemID}`
 }

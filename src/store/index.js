@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import user from './modules/user'
 import contest from './modules/contest'
-import examination from './modules/examination'
+import course from './modules/course'
 import api from '@oj/api'
 import types from './types'
 
@@ -64,7 +64,7 @@ export default new Vuex.Store({
   modules: {
     user,
     contest,
-    examination
+    course
   },
   state: rootState,
   getters: rootGetters,

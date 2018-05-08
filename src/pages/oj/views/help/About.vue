@@ -1,77 +1,137 @@
 <template>
   <div>
-    <panel class="container">
-      <div slot="title">Compiler & Judger</div>
-      <div class="content markdown-body">
-        <ul>
-          <li v-for="lang in languages">{{lang.name}} ( {{lang.description}} )
-            <pre>{{lang.config.compile.compile_command}}</pre>
-          </li>
-        </ul>
-      </div>
-    </panel>
-
-    <panel :padding="15" class="container">
-      <div slot="title">Result Explanation</div>
-      <div class="content">
-        <ul>
-          <li><b>Pending & Juding</b> : You solution will be judged soon, please wait for result</li>
-          <li><b>Compile Error</b> :	Failed to compile your source code. Click on the link to see compiler's output.
-      </li>
-          <li><b>Accepted</b> :	Congratulations. Your solution is correct.</li>
-          <li><b>Wrong Answer</b> :	Your program's output doesn't match judger's answer.</li>
-          <li>
-            <b>Runtime Error</b>
-            :	Your program terminated abnormally. Possible reasons are: segment fault, divided by zero or exited with code other than 0.
-          </li>
-          <li><b>Time Limit Exceeded</b>
-            :	The CPU time your program used has exceeded limit. Java has a triple time limit.
-          </li>
-          <li><b>Memory Limit Exceeded</b> :	The memory your program actually used has exceeded limit.</li>
-          <li><b>System Error</b> :	Oops, something has gone wrong with the judger. Please report this to administrator.
-          </li>
-        </ul>
-      </div>
-    </panel>
-
+    <Row :gutter="15" type="flex" justify="center" style="margin-bottom: 10px;">
+      <Col :xs="24" :sm="6">
+        <Card class="card-item">
+          <div slot="title">
+            <div class="person">
+              <span class="name">吴世枫</span>
+              <div class="intro">这里是介绍</div>
+            </div>
+          </div>
+          <div class="intro-container">
+            <div class="image-container">
+              <img class="img" src="/public/avatar/default.png" alt="">
+            </div>
+            <div class="tags">
+              <Tag color="blue" style="width: 80px;">发起人</Tag>
+            </div>
+          </div>
+        </Card>
+      </Col>
+    </Row>
+    <Row :gutter="15" type="flex" justify="center">
+      <Col :xs="24" :sm="6">
+        <Card class="card-item">
+          <div slot="title">
+            <div class="person">
+              <span class="name">郑海兵</span>
+              <div class="intro">广师数科院14信计</div>
+            </div>
+          </div>
+          <div class="intro-container">
+            <div class="image-container">
+              <img class="img" src="/public/avatar/default.png" alt="">
+            </div>
+            <div class="tags">
+              <Tag color="blue" style="width: 80px;">后端开发</Tag>
+            </div>
+          </div>
+        </Card>
+      </Col>
+      <Col :xs="24" :sm="6">
+        <Card class="card-item">
+          <div slot="title">
+            <div class="person">
+              <span class="name">卢翼翔</span>
+              <div class="intro">广师数科院14信计</div>
+            </div>
+          </div>
+          <div class="intro-container">
+            <div class="image-container">
+              <img class="img" src="/public/avatar/default.png" alt="">
+            </div>
+            <div class="tags">
+              <Tag color="blue" style="width: 80px;">负责部分</Tag>
+            </div>
+          </div>
+        </Card>
+      </Col>
+      <Col :xs="24" :sm="6">
+        <Card class="card-item">
+          <div slot="title">
+            <div class="person">
+              <span class="name">胡伟林</span>
+              <div class="intro">广师数科院14信计</div>
+            </div>
+          </div>
+          <div class="intro-container">
+            <div class="image-container">
+              <img class="img" src="/public/avatar/default.png" alt="">
+            </div>
+            <div class="tags">
+              <Tag color="blue" style="width: 80px;">前端开发</Tag>
+            </div>
+          </div>
+        </Card>
+      </Col>
+    </Row>
   </div>
 </template>
 
 <script>
-  import utils from '@/utils/utils'
-
   export default {
-    data () {
-      return {
-        languages: []
-      }
-    },
-    beforeRouteEnter (to, from, next) {
-      utils.getLanguages().then(languages => {
-        next(vm => {
-          vm.languages = languages
-        })
-      })
-    }
   }
 </script>
 
 <style scoped lang="less">
-  .container {
-    margin-bottom: 20px;
-
-    .content {
+  .card-item {
+    background-color: #eee;
+  }
+  .person {
+    .name {
+      display: inline-block;
+      color: blue;
       font-size: 16px;
-      margin: 0 50px 20px 50px;
-      > ul {
-        list-style: disc;
-        li {
-          line-height: 2;
-          .title {
-            font-weight: 500;
-          }
+      font-weight: bold;
+    }
+    .intro {
+      color: grey;
+      font-size: 14px;
+      height: 18px;
+      line-height: 18px;
+      margin: 5px 0 0 5px;
+    }
+  }
+  .intro-container {
+    .image-container {
+      width: 180px;
+      height: 180px;
+      text-align: center;
+      margin: 0 auto;
+      .img {
+        width: 150px;
+        height: 150px;
+        cursor: pointer;
+        border-radius: 50%;
+        box-shadow: -5px 4px 14px #aaa;
+        transition: all .4s;
+        -webkit-transition: all .4s;
+        -moz-transition: all .4s;
+        -o-transition: all .4s;
+        -ms-transition: all .4s;
+        &:hover {
+          transform: scale(1.1,1.1);
+          -webkit-transform: scale(1.1,1.1);
+          -moz-transform: scale(1.1,1.1);
+          -o-transform: scale(1.1,1.1);
+          -ms-transform: scale(1.1,1.1);
         }
       }
+    }
+    .tags {
+      margin-top: 10px;
+      text-align: center;
     }
   }
 </style>

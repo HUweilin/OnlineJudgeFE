@@ -3,19 +3,9 @@
     <Col :span="22">
     <Panel :padding="10">
       <div slot="title">排行榜</div>
-      <div slot="extra">
-        <Dropdown @on-click="filterByRank">
-          <span>{{ranks[query.rank]}}
-            <Icon type="arrow-down-b"></Icon>
-          </span>
-          <Dropdown-menu slot="list">
-            <Dropdown-item v-for="(rank, key) in ranks" :name="key" :key="key">{{rank}}</Dropdown-item>
-          </Dropdown-menu>
-        </Dropdown>
-      </div>
-      <!-- <div class="echarts">
+      <div class="echarts">
         <ECharts :options="options" ref="chart" auto-resize></ECharts>
-      </div> -->
+      </div>
     </Panel>
     <Table :data="dataRank" :columns="columns" :loading="loadingTable" size="large"></Table>
     <Pagination :total="total" :page-size.sync="limit" :current.sync="page"
@@ -101,7 +91,7 @@
             trigger: 'axis'
           },
           legend: {
-            data: ['AC', 'Total']
+            data: ['通过数', '提交数']
           },
           grid: {
             x: '3%',
@@ -139,7 +129,7 @@
           ],
           series: [
             {
-              name: 'AC',
+              name: '通过数',
               type: 'bar',
               data: [0],
               markPoint: {
@@ -149,7 +139,7 @@
               }
             },
             {
-              name: 'Total',
+              name: '提交数',
               type: 'bar',
               data: [0],
               markPoint: {
@@ -159,14 +149,6 @@
               }
             }
           ]
-        },
-        query: {
-          rank: 'programming'
-        },
-        ranks: {
-          programming: '编程排行榜',
-          math: '数学排行榜',
-          synthesis: '综合排行榜'
         }
       }
     },
@@ -202,9 +184,6 @@
         this.options.xAxis[0].data = usernames
         this.options.series[0].data = acData
         this.options.series[1].data = totalData
-      },
-      filterByRank (rank) {
-        this.query.rank = rank
       }
     }
   }

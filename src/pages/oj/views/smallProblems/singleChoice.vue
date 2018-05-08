@@ -1,5 +1,5 @@
 <template>
-	<div class="test">
+	<div id="pro-wrapper">
 		<div class="problem-container">
 			<div v-html="problem.description"></div>
       <div class="option" 
@@ -10,13 +10,11 @@
         {{option}}
       </div>
 		</div>
-		<Button v-if="my_status === SMALL_PROBLEM_STATUS.NOT_ANSWER || my_status === undefined" 
-    type="primary" long 
-    @click="submitAnswer" 
-    :disabled="problemSubmitDisabled" 
+		<Button v-if="my_status === SMALL_PROBLEM_STATUS.NOT_ANSWER" type="primary" long @click="submitAnswer" 
+    :disabled="courseProblemSubmitDisabled" 
     :loading="loading">提交</Button>
-    <!-- 不是测验且要登录且非未答题状态则显示 答题后不显示 -->
-    <div v-else-if="isAuthenticated && !isExamination" :class="{'answer-true': my_status === SMALL_PROBLEM_STATUS.RIGHT, 'answer-false': my_status === SMALL_PROBLEM_STATUS.ERROR}">
+    <!-- 已登录且非未答题状态则显示 答题后不显示 -->
+    <div v-else-if="isAuthenticated" :class="{'answer-true': my_status === SMALL_PROBLEM_STATUS.RIGHT, 'answer-false': my_status === SMALL_PROBLEM_STATUS.ERROR}">
       <span>正确答案是: &nbsp;</span>
       <span class="ans">{{modelAnswers}}</span>
       <span class="result" v-if="my_status === SMALL_PROBLEM_STATUS.RIGHT">你做对了</span>
@@ -25,9 +23,9 @@
 	</div>
 </template>
 <script>
-  import { mapGetters } from 'vuex'
   import api from '@oj/api'
   import { SMALL_PROBLEM_STATUS } from '@/utils/constants'
+  import smallProblemMixin from './smallProblem.js'
   export default {
     props: {
       problem: {
@@ -35,19 +33,13 @@
         required: true
       }
     },
+    mixins: [smallProblemMixin],
     data () {
       return {
         // 提交的答案
         answers: SMALL_PROBLEM_STATUS.NOT_ANSWER,
-        optionsArr: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'],
-        loading: false,
         // 正确答案
-        modelAnswers: '',
-        examID: '',
-        // 路由名
-        routeName: '',
-        SMALL_PROBLEM_STATUS: SMALL_PROBLEM_STATUS,
-        my_status: -1
+        modelAnswers: ''
       }
     },
     mounted () {
@@ -55,9 +47,7 @@
     },
     methods: {
       init () {
-        // 获取答题的状态
-        console.log(this.problem)
-        this.my_status = this.problem.my_status === null ? -1 : this.problem.my_status
+        this.setSomeParams()
         // 若登录且已答过题 则将自己的答案补充上去 答案的类型为数组
         if (this.isAuthenticated && (this.my_status === SMALL_PROBLEM_STATUS.RIGHT || this.my_status === SMALL_PROBLEM_STATUS.ERROR)) {
           // 由于返回的答案类型是数组 所以需要进行取值
@@ -65,19 +55,15 @@
         }
         // 正确答案 赋值
         this.modelAnswers = this.problem.answer[0]
-        this.routeName = this.$route.name
-        if (this.routeName === 'test-details') {
-            // 如果是课堂测验 某个测验里面
-          this.examID = this.$route.params.testID
-        } else if (this.routeName === 'homework-details') {
-            // 若是某个课后作业里面
-          this.examID = this.$route.params.homeworkID
-        }
-        // 若只是在题库中 则不用操作
+        this.$nextTick(() => {
+          if (window.MathJax) {
+            window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, 'pro-wrapper'])
+          }
+        })
       },
       selectAnswer (letter) {
         // 若已答题 则无法点击
-        if (this.my_status !== SMALL_PROBLEM_STATUS.NOT_ANSWER) {
+        if (this.my_status !== SMALL_PROBLEM_STATUS.NOT_ANSWER || this.courseProblemSubmitDisabled) {
           return false
         }
         if (this.answers === letter) {
@@ -98,17 +84,15 @@
             id: this.problem.id,
             my_answer: ans
           }
-          // 判断是否是测验页面并添加测验的id
-          if (this.routeName === 'test-details') {
-            data.test_id = this.examID
-          } else if (this.routeName === 'homework-details') {
-            data.homework_id = this.examID
+          let funcName = this.courseID ? 'submitUnitSmallProblem' : 'submitSmallProblem'
+          if (funcName === 'submitUnitSmallProblem') {
+            data.course_id = this.courseID
+            data.task_id = this.unitID
           }
-          api.submitSmallProblem(data).then(res => {
+          api[funcName](data).then(res => {
             this.$success('提交成功')
             this.loading = false
             // 将答题结果赋值给my_status
-            console.log(res.data.data)
             this.my_status = res.data.data.my_status
             this.$emit('succeed')
           }, res => {
@@ -117,17 +101,6 @@
           }).catch((err) => {
             console.log(err)
           })
-        }
-      }
-    },
-    computed: {
-      ...mapGetters(['problemSubmitDisabled', 'isAuthenticated', 'examinationStatus']),
-      // 是否在测验或者作业页面
-      isExamination () {
-        if (this.examID) {
-          return true
-        } else {
-          return false
         }
       }
     }

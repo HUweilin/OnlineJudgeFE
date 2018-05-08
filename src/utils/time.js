@@ -35,7 +35,7 @@ function durationTime (startTime, endTime) {
   }
   // 相差时间
   let duration = moment.duration(diff, 'seconds')
-  let day = duration.days()
+  let day = end.diff(start, 'days')
   let hour = duration.hours()
   let min = duration.minutes()
   if (day === 0) {
@@ -45,9 +45,23 @@ function durationTime (startTime, endTime) {
   }
 }
 
+function unitTimeLegal (currentTime, startTime, endTime) {
+  let current = moment(currentTime)
+  let start = moment(startTime)
+  let end = moment(endTime)
+  let diff1 = end.diff(current, 'seconds')
+  let diff2 = current.diff(start, 'seconds')
+  if (diff1 < 0 || diff2 < 0) {
+    // 说明不合法
+    return false
+  }
+  return true
+}
+
 export default {
   utcToLocal: utcToLocal,
   duration: duration,
   secondFormat: secondFormat,
-  durationTime: durationTime
+  durationTime: durationTime,
+  unitTimeLegal: unitTimeLegal
 }

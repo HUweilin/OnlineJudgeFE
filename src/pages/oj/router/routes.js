@@ -4,14 +4,12 @@ import {
   ACMRank,
   Announcements,
   ApplyResetPassword,
-  FAQ,
   Home,
   Logout,
   NotFound,
   OIRank,
   Problem,
   ProblemList,
-  // smallProblemList,
   ResetPassword,
   SubmissionDetails,
   SubmissionList,
@@ -20,7 +18,7 @@ import {
 
 import * as Contest from '@oj/views/contest'
 import * as Setting from '@oj/views/setting'
-import * as Examination from '@oj/views/class'
+import * as Course from '@oj/views/course'
 
 export default [
   {
@@ -111,69 +109,44 @@ export default [
       }
     ]
   },
-  // 新增 测验列表
+  // 课程相关路由
+  // 课程列表
   {
-    name: 'testing-list',
-    path: '/tests',
-    component: Examination.ExaminationList
+    name: 'course-list',
+    path: '/courses',
+    meta: {requiresAuth: true},
+    component: Course.CourseList
   },
+  // 单个课程信息
   {
-    name: 'test-details',
-    path: '/test/:testID',
-    component: Examination.ExaminationDetail,
+    name: 'course-details',
+    path: '/course/:courseID/',
+    meta: {requiresAuth: true},
+    component: Course.CourseDetail,
     children: [
+      // 公告列表
       {
-        name: 'test-problem-list',
-        path: 'problems',
-        component: Examination.ExaminationProblemList
+        name: 'course-announcement-list',
+        path: 'announcements',
+        component: Announcements
       },
+      // 单元列表
       {
-        name: 'test-problem-details',
-        path: 'problem/:problemID/',
-        component: Examination.Problem
+        name: 'course-unit-list',
+        path: 'unit',
+        component: Course.CourseUnitList
       },
+      // 单元习题列表
       {
-        name: 'test-submission-list',
-        path: 'submissions',
-        component: SubmissionList
+        name: 'course-unit-problem-list',
+        path: 'unit/:unitID',
+        component: Course.UnitProblemList
       },
+      // 单元编程题界面
       {
-        name: 'test-rank',
-        path: 'rank',
-        component: Examination.Rank
-      }
-    ]
-  },
-  // 新增 作业列表
-  {
-    name: 'homework-list',
-    path: '/homeworkList',
-    component: Examination.ExaminationList
-  },
-  {
-    name: 'homework-details',
-    path: '/homework/:homeworkID',
-    component: Examination.ExaminationDetail,
-    children: [
-      {
-        name: 'homework-problem-list',
-        path: 'problems',
-        component: Examination.ExaminationProblemList
-      },
-      {
-        name: 'homework-problem-details',
-        path: 'problem/:problemID/',
-        component: Examination.Problem
-      },
-      {
-        name: 'homework-submission-list',
-        path: 'submissions',
-        component: SubmissionList
-      },
-      {
-        name: 'homework-rank',
-        path: 'rank',
-        component: Examination.Rank
+        name: 'course-unit-problem',
+        path: 'unit/:unitID/problem/:problemID',
+        component: Problem
       }
     ]
   },
@@ -228,11 +201,6 @@ export default [
     path: '/about',
     name: 'about',
     component: About
-  },
-  {
-    path: '/faq',
-    name: 'faq',
-    component: FAQ
   },
   {
     path: '*',

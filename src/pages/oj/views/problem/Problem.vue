@@ -1,12 +1,12 @@
 <template>
   <Row type="flex" justify="space-between" class="problem-wrapper">
-    <Col :xs="24" :sm="19">
+    <Col :xs="24" :sm="colNum">
       <div id="problem-main">
         <!--problem main-->
         <Panel :padding="40" shadow>
           <div slot="title" style="font-size: 16px;">
             <div class="info">
-              <span class="single-info">{{problem.title}}</span>
+              <span class="single-info">题目: {{problem.title}}</span>
               <span class="single-info">ID:&nbsp;{{problem._id}}</span>
               <Poptip class="single-info" trigger="hover" placement="top" v-if="problem.tags.length">
                 <a>标签</a>
@@ -14,13 +14,13 @@
                   <Tag v-for="tag in problem.tags" :key="tag">{{tag}}</Tag>
                 </div>
               </Poptip>
-            <div class="single-info"><Button type="primary" @click="codeVisible=!codeVisible" icon="compose" :disabled="problemSubmitDisabled">提交</Button></div>
+              <div class="single-info btn"><Button type="primary" @click="codeVisible=!codeVisible" icon="compose" :disabled="problemSubmitDisabled || courseProblemSubmitDisabled">提交</Button></div>
             </div>
             <div class="info">
               <span class="single-info">时间限制(ms):&nbsp;{{problem.time_limit}}</span>
               <span class="single-info">空间限制(kb):&nbsp;{{problem.memory_limit}}</span>
-              <span class="single-info">提交数:&nbsp;{{problem.submission_number}}</span>
-              <span class="single-info">通过数:&nbsp;{{problem.accepted_number}}</span>
+              <span class="single-info" v-if="!courseID">提交数:&nbsp;{{problem.submission_number}}</span>
+              <span class="single-info" v-if="!courseID">通过数:&nbsp;{{problem.accepted_number}}</span>
             </div>
           </div>
           <div id="problem-content" ref="problemContent" class="markdown-body">
@@ -70,7 +70,7 @@
       </div>
     </Col>
 
-    <Col :xs="24" :sm="4">
+    <Col :xs="24" :sm="4" v-if="!courseID">
       <div id="right-column">
         <VerticalMenu @on-click="handleRoute">
         <!-- 如果非竞赛跳转过来 则不显示题目和竞赛公告 -->
@@ -86,7 +86,7 @@
             </VerticalMenu-item>
           </template>
           <!-- 1、如果不是竞赛 或者 是比赛类型为ACM或比赛状态为ENDED(-1) 2、是管理员 -->
-          <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission" :route="submissionRoute">
+          <VerticalMenu-item v-if="!contestID || OIContestRealTimePermission" :route="submissionRoute">
             <Icon type="navicon-round"></Icon>
             提交情况
           </VerticalMenu-item>
@@ -128,7 +128,9 @@
         v-if="codeVisible"></CodeMirror>
         <Row type="flex" justify="space-between">
           <Col :span="10">
+            <!-- 显示当前提交的状态 -->
             <div class="status" v-if="statusVisible">
+              <!-- 不是竞赛 或者是竞赛且oi实时显示 -->
               <template v-if="!this.contestID || (this.contestID && OIContestRealTimePermission)">
                 <span>状态:</span>
                 <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
@@ -159,7 +161,7 @@
                 <Input v-model="captchaCode" class="captcha-code"/>
               </div>
             </template>
-            <Button type="warning" icon="edit" :loading="submitting" @click="submitCode" :disabled="problemSubmitDisabled"
+            <Button type="warning" icon="edit" :loading="submitting" @click="submitCode" :disabled="problemSubmitDisabled || courseProblemSubmitDisabled"
                     class="fl-right">
               <span v-if="!submitting">提交</span>
               <span v-else>提交中</span>
@@ -179,9 +181,10 @@
   import storage from '@/utils/storage'
   import { client } from '@/utils/dom.js'
   import { FormMixin } from '@oj/components/mixins'
-  import { JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey } from '@/utils/constants'
+  import { JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey, buildCourseProblemCodeKey } from '@/utils/constants'
   import api from '@oj/api'
   import { pie, largePie } from './chartData'
+  import utils from '@/utils/utils.js'
 
   // 只显示这些状态的图形占用
   const filtedStatus = ['-1', '-2', '0', '1', '2', '3', '4', '8']
@@ -229,11 +232,25 @@
         largePieInitOpts: {
           width: '500',
           height: '480'
-        }
+        },
+        // 路由名称
+        routeName: '',
+        // 课程id和单元id
+        courseID: '',
+        unitID: '',
+        // 所占宽度，课程界面不需要右侧导航栏 所以这时问题占整行
+        colNum: 19
       }
     },
     beforeRouteEnter (to, from, next) {
-      let problemCode = storage.get(buildProblemCodeKey(to.params.problemID, to.params.contestID))
+      let problemCode
+      // 判断是竞赛的路由还是课程的路由，或者题库的路由
+      if (to.params.courseID) {
+        problemCode = storage.get(buildCourseProblemCodeKey(to.params.problemID, to.params.courseID, to.params.unitID))
+      } else {
+        problemCode = storage.get(buildProblemCodeKey(to.params.problemID, to.params.contestID))
+      }
+      // 判断是否有存储该题的答题信息
       if (problemCode) {
         next(vm => {
           vm.language = problemCode.language
@@ -247,19 +264,51 @@
       // 竞赛界面右侧有菜单栏 若进入竞赛某个题目界面会复用problem
       // 所以要隐藏竞赛界面的菜单栏
       this.$store.commit(types.CHANGE_CONTEST_ITEM_VISIBLE, {menu: false})
+      // 获取课程和单元的id 路由名称
+      this.routeName = this.$route.name
+      this.courseID = this.$route.params.courseID
+      this.unitID = this.$route.params.unitID
+      // 提交代码的api
+      this.submitFunc = {
+        'problem-details': 'submitCode',
+        'contest-problem-details': 'submitCode',
+        'course-unit-problem': 'submitUnitCode'
+      }[this.routeName]
+      // 获取判题结果的api,提交代码后获取判题结果
+      this.getSubmitFunc = {
+        'problem-details': 'getSubmission',
+        'contest-problem-details': 'getSubmission',
+        'course-unit-problem': 'getCourseSubmission'
+      }[this.routeName]
       this.init()
+      if (!this.$route.params.courseID) {
       // 固定题目内容 暂时没想到好的方法
-      setTimeout(() => {
-        this.proInfoHeight()
-      }, 1500)
+        setTimeout(() => {
+          this.proInfoHeight()
+        }, 1500)
+        this.colNum = 19
+      } else {
+        // 是课程界面 设置题目所占宽度
+        this.colNum = 24
+      }
+      console.log(this.courseProblemSubmitDisabled)
     },
     methods: {
       init () {
         this.$Loading.start()
         this.contestID = this.$route.params.contestID
         this.problemID = this.$route.params.problemID
-        let func = this.$route.name === 'problem-details' ? 'getProblem' : 'getContestProblem'
-        api[func](this.problemID, this.contestID).then(res => {
+        let func = {
+          'problem-details': 'getProblem',
+          'contest-problem-details': 'getContestProblem',
+          'course-unit-problem': 'getUnitProblem'
+        }[this.routeName]
+        let params = {
+          contestID: this.contestID,
+          courseID: this.courseID,
+          taskID: this.unitID
+        }
+        api[func](this.problemID, params).then(res => {
           this.$Loading.finish()
           this.$nextTick(() => {
             if (window.MathJax) {
@@ -267,12 +316,16 @@
             }
           })
           let problem = res.data.data
-          api.submissionExists(problem.id).then(res => {
-            this.submissionExists = res.data.data
-          })
+          if (!this.courseID) {
+            api.submissionExists(problem.id).then(res => {
+              this.submissionExists = res.data.data
+            })
+          }
           problem.languages = problem.languages.sort()
           this.problem = problem
-          this.changePie(problem)
+          if (!this.courseID) {
+            this.changePie(problem)
+          }
 
           // 在beforeRouteEnter中修改了, 说明本地有code， 无需加载template
           if (this.language !== 'C++' || this.code !== '' || this.problem.languages.indexOf(this.language) !== -1) {
@@ -324,7 +377,9 @@
         this.largePie.series[0].data = largePieData
       },
       handleRoute (route) {
-        this.$router.push(route)
+        if (!this.courseID) {
+          this.$router.push(route)
+        }
       },
       onChangeLang (newLang) {
         if (this.problem.template[newLang]) {
@@ -332,7 +387,7 @@
             this.code = this.problem.template[newLang]
           } else {
             this.$Modal.confirm({
-              content: 'The problem has template for ' + newLang + ', Do you want to replace your code with template?',
+              content: '该题目有 ' + newLang + ' 的模板, 是否替换你这个模板的代码?',
               onOk: () => {
                 this.code = this.problem.template[newLang]
               }
@@ -349,7 +404,7 @@
         }
         const checkStatus = () => {
           let id = this.submissionId
-          api.getSubmission(id).then(res => {
+          api[this.getSubmitFunc](id).then(res => {
             this.result = res.data.data
             if (Object.keys(res.data.data.statistic_info).length !== 0) {
               this.submitting = false
@@ -377,14 +432,18 @@
           problem_id: this.problem.id,
           language: this.language,
           code: this.code,
-          contest_id: this.contestID
+          contest_id: this.contestID,
+          course_id: this.courseID,
+          task_id: this.unitID
         }
+        data = utils.filterEmptyValue(data)
         if (this.captchaRequired) {
           data.captcha = this.captchaCode
         }
         const submitFunc = (data, detailsVisible) => {
+          console.log(detailsVisible)
           this.statusVisible = true
-          api.submitCode(data).then(res => {
+          api[this.submitFunc](data).then(res => {
             this.submissionId = res.data.data && res.data.data.submission_id
             // 定时检查状态
             this.submitting = false
@@ -411,7 +470,7 @@
           if (this.submissionExists) {
             this.$Modal.confirm({
               title: '',
-              content: '<h3>You have submission in this problem, sure to cover it?<h3>',
+              content: '<h3>你已经提交过这个问题, 确认要重新提交?<h3>',
               onOk: () => {
                 // 暂时解决对话框与后面提示对话框冲突的问题(否则一闪而过）
                 setTimeout(() => {
@@ -455,7 +514,7 @@
       }
     },
     computed: {
-      ...mapGetters(['problemSubmitDisabled', 'contestRuleType', 'OIContestRealTimePermission', 'contestStatus']),
+      ...mapGetters(['problemSubmitDisabled', 'contestRuleType', 'OIContestRealTimePermission', 'contestStatus', 'courseProblemSubmitDisabled']),
       contest () {
         return this.$store.state.contest.contest
       },
@@ -482,10 +541,17 @@
       clearInterval(this.refreshStatus)
 
       this.$store.commit(types.CHANGE_CONTEST_ITEM_VISIBLE, {menu: true})
-      storage.set(buildProblemCodeKey(this.problem._id, from.params.contestID), {
-        code: this.code,
-        language: this.language
-      })
+      if (!this.courseID) {
+        storage.set(buildProblemCodeKey(this.problem._id, from.params.contestID), {
+          code: this.code,
+          language: this.language
+        })
+      } else {
+        storage.set(buildCourseProblemCodeKey(this.problem.id, this.courseID, this.unitID), {
+          code: this.code,
+          language: this.language
+        })
+      }
       next()
     },
     watch: {
@@ -508,8 +574,9 @@
           display: flex;
           margin-bottom: 5px;
           .single-info {
-            flex: auto;
-            &:last-child {
+            flex: 1;
+            text-align: left;
+            &.btn {
               text-align: right;
             }
           }

@@ -6,6 +6,7 @@
         <el-row :gutter="20">
           <el-col :span="6">
             <el-form-item prop="_id" label="展示编号"
+                          v-if="!isCoursePage"
                           :required="this.routeName === 'create-contest-problem' || this.routeName === 'edit-contet-problem'">
               <el-input placeholder="展示的编号" v-model="problem._id"></el-input>
             </el-form-item>
@@ -56,7 +57,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row :gutter="20">
+        <el-row :gutter="20" v-if="!isCoursePage">
           <el-col :span="6">
             <el-form-item label="是否可见">
               <el-switch
@@ -67,7 +68,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="标签" :error="error.tags" required>
+            <el-form-item label="标签" :error="error.tags" :required="!isCoursePage">
               <span class="tags">
                 <el-tag
                   v-for="tag in problem.tags"
@@ -280,12 +281,15 @@
           testCase: ''
         },
         // 标签列表
-        tagList: []
+        tagList: [],
+        // 是否对应的课程页面
+        isCoursePage: ''
       }
     },
     mounted () {
       this.routeName = this.$route.name
-      if (this.routeName === 'edit-problem' || this.routeName === 'edit-contest-problem') {
+      // 判断是题库题目修改、竞赛题库题目修改还是课程单元题目修改
+      if (this.routeName === 'edit-problem' || this.routeName === 'edit-contest-problem' || this.routeName === 'edit-course-unit-problem') {
         this.mode = 'edit'
       } else {
         this.mode = 'add'
@@ -330,10 +334,15 @@
         let allLanguage = res.data.data
         this.allLanguage = allLanguage
 
-        // get problem after getting languages list to avoid find undefined value in `watch problem.languages`
+        // 在获得语言后获取题目信息 ，去避免在watch里观测到problem.languages的值为undefined
         if (this.mode === 'edit') {
           this.title = '修改题目'
-          let funcName = {'edit-problem': 'getProblem', 'edit-contest-problem': 'getContestProblem'}[this.routeName]
+          let funcName = {
+            'edit-problem': 'getProblem',
+            'edit-contest-problem': 'getContestProblem',
+            // 新添加的课程单元的路由
+            'edit-course-unit-problem': 'getProblem'
+          }[this.routeName]
           api[funcName](this.$route.params.problemId).then(problemRes => {
             let data = problemRes.data.data
             if (!data.spj_code) {
@@ -350,14 +359,16 @@
           }
         }
       })
-      // 获取标签列表
-      api.getProblemTagList().then(res => {
-        for (let tag of res.data.data) {
-          this.tagList.push({value: tag.name})
-        }
-      }).catch(() => {
-        this.tagList = []
-      })
+      // 获取标签列表 若是课程题目则不必请求
+      if (this.routeName !== 'create-unit-problem' && this.routeName !== 'edit-course-unit-problem') {
+        api.getProblemTagList().then(res => {
+          for (let tag of res.data.data) {
+            this.tagList.push({value: tag.name})
+          }
+        }).catch(() => {
+          this.tagList = []
+        })
+      }
     },
     watch: {
       '$route' () {
@@ -366,7 +377,7 @@
       },
       'problem.languages' (newVal) {
         let data = {}
-        // use deep copy to avoid infinite loop
+        // 使用深度拷贝 避免无限循环
         let languages = JSON.parse(JSON.stringify(newVal)).sort()
         for (let item of languages) {
           if (this.template[item] === undefined) {
@@ -388,6 +399,14 @@
         this.spjMode = this.allLanguage.spj_languages.find(item => {
           return item.name === this.problem.spj_language
         }).content_type
+      },
+      // 判断是否为对应的课程路由
+      routeName (val) {
+        if (this.routeName === 'create-unit-problem' || this.routeName === 'edit-course-unit-problem') {
+          this.isCoursePage = true
+        } else {
+          this.isCoursePage = false
+        }
       }
     },
     methods: {
@@ -495,17 +514,17 @@
             return
           }
         }
-        if (!this.problem.tags.length) {
+        if (!this.isCoursePage && !this.problem.tags.length) {
           this.error.tags = '请至少添加一个标签~'
           this.$error(this.error.tags)
           return
         }
         if (this.problem.spj) {
           if (!this.problem.spj_code) {
-            this.error.spj = 'Spj code is required'
+            this.error.spj = 'Spj code 是必须的'
             this.$error(this.error.spj)
           } else if (!this.problem.spj_compile_ok) {
-            this.error.spj = 'SPJ code has not been successfully compiled'
+            this.error.spj = 'SPJ code 没有编译成功'
           }
           if (this.error.spj) {
             this.$error(this.error.spj)
@@ -546,17 +565,31 @@
           'create-problem': 'createProblem',
           'edit-problem': 'editProblem',
           'create-contest-problem': 'createContestProblem',
-          'edit-contest-problem': 'editContestProblem'
+          'edit-contest-problem': 'editContestProblem',
+          // 新增课程题目的路由，创建和修改均使用新的api
+          'create-unit-problem': 'createUnitProblem',
+          'edit-course-unit-problem': 'editUnitProblem'
         }[this.routeName]
-        // edit contest problem 时, contest_id会被后来的请求覆盖掉
+        // 修改竞赛题目时, contest_id会被后来的请求覆盖掉
         if (funcName === 'editContestProblem') {
           this.problem.contest_id = this.contest.id
         }
+        // 若是单元里创建新题目则需要添加course_id和task_id
+        if (funcName === 'createUnitProblem' || funcName === 'editUnitProblem') {
+          this.problem.task_id = this.$route.params.taskId
+          // 课程新建的题目需要加多一个字段is_public，标识为非公共
+          this.problem.is_public = false
+        }
         api[funcName](this.problem).then(res => {
+          // 若是竞赛模块
           if (this.routeName === 'create-contest-problem' || this.routeName === 'edit-contest-problem') {
             this.$router.push({name: 'contest-problem-list', params: {contestId: this.$route.params.contestId}})
-          } else {
+          } else if (this.routeName === 'create-problem' || this.routeName === 'edit-problem') {
+            // 若是编程题题库模块
             this.$router.push({name: 'problem-list'})
+          } else {
+            // 否则则是课程模块
+            this.$router.push({name: 'course-unit-problem-list', params: {courseId: this.$route.params.courseId, taskId: this.problem.task_id}})
           }
         }).catch(() => {
         })

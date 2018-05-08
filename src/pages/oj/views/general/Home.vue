@@ -28,7 +28,7 @@
       </panel>
       <Announcements class="announcement"></Announcements>
       <!-- 编程题 热度推荐 首-->
-      <panel shadow class="programming">
+      <!-- <panel shadow class="programming">
         <div slot="title">
           编程题 热度推荐
         </div>
@@ -37,10 +37,10 @@
         :data="programRecom.hotRecom"
         size="small"
         disabled-hover></Table>
-      </panel>
+      </panel> -->
       <!-- 编程题 热度推荐 末-->
       <!-- 编程题 个性推荐 首-->
-      <panel shadow class="programming" v-if="isAuthenticated">
+      <!-- <panel shadow class="programming" v-if="isAuthenticated">
         <div slot="title">
           编程题 个性推荐
         </div>
@@ -49,9 +49,9 @@
         :data="programRecom.personalRecom" 
         size="small"
         disabled-hover></Table>
-      </panel>
+      </panel> -->
       <!-- 文章推荐 末-->
-      <panel shadow class="article">
+      <!-- <panel shadow class="article">
         <div slot="title">
           文章推荐
         </div>
@@ -59,7 +59,7 @@
         :data="programRecom.articleRecom" 
         size="small"
         disabled-hover></Table>
-      </panel>
+      </panel> -->
       <!-- 文章推荐 末-->
     </Col>
   </Row>
@@ -80,81 +80,81 @@
     data () {
       return {
         contests: [],
-        index: 0,
-        // 表头
-        programTableColumns: [
-          {
-            title: '#',
-            key: '_id',
-            render: (h, params) => {
-              return h('Button', {
-                props: {
-                  type: 'text',
-                  size: 'large'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
-                  }
-                },
-                style: {
-                  padding: '2px 0'
-                }
-              }, params.row._id)
-            }
-          },
-          {
-            title: '题目',
-            width: '35%',
-            ellipsis: true,
-            render: (h, params) => {
-              return h('Button', {
-                props: {
-                  type: 'text',
-                  size: 'large'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
-                  }
-                },
-                style: {
-                  padding: '2px 0'
-                }
-              }, params.row.title)
-            }
-          },
-          {
-            title: '难度',
-            render: (h, params) => {
-              let t = params.row.difficulty
-              let color = 'blue'
-              if (t === 'Low') color = 'green'
-              else if (t === 'High') color = 'yellow'
-              return h('Tag', {
-                props: {
-                  color: color
-                }
-              }, params.row.difficulty)
-            }
-          },
-          {
-            title: '提交量',
-            key: 'submission_number'
-          },
-          {
-            title: '通过率',
-            render: (h, params) => {
-              return h('span', this.getACRate(params.row.accepted_number, params.row.submission_number))
-            }
-          }
-        ],
-        // 编程题推荐数据
-        programRecom: {
-          'hotRecom': [],
-          'personalRecom': [],
-          'articleRecom': []
-        }
+        index: 0
+        // // 表头
+        // programTableColumns: [
+        //   {
+        //     title: '#',
+        //     key: '_id',
+        //     render: (h, params) => {
+        //       return h('Button', {
+        //         props: {
+        //           type: 'text',
+        //           size: 'large'
+        //         },
+        //         on: {
+        //           click: () => {
+        //             this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
+        //           }
+        //         },
+        //         style: {
+        //           padding: '2px 0'
+        //         }
+        //       }, params.row._id)
+        //     }
+        //   },
+        //   {
+        //     title: '题目',
+        //     width: '35%',
+        //     ellipsis: true,
+        //     render: (h, params) => {
+        //       return h('Button', {
+        //         props: {
+        //           type: 'text',
+        //           size: 'large'
+        //         },
+        //         on: {
+        //           click: () => {
+        //             this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
+        //           }
+        //         },
+        //         style: {
+        //           padding: '2px 0'
+        //         }
+        //       }, params.row.title)
+        //     }
+        //   },
+        //   {
+        //     title: '难度',
+        //     render: (h, params) => {
+        //       let t = params.row.difficulty
+        //       let color = 'blue'
+        //       if (t === 'Low') color = 'green'
+        //       else if (t === 'High') color = 'yellow'
+        //       return h('Tag', {
+        //         props: {
+        //           color: color
+        //         }
+        //       }, params.row.difficulty)
+        //     }
+        //   },
+        //   {
+        //     title: '提交量',
+        //     key: 'submission_number'
+        //   },
+        //   {
+        //     title: '通过率',
+        //     render: (h, params) => {
+        //       return h('span', this.getACRate(params.row.accepted_number, params.row.submission_number))
+        //     }
+        //   }
+        // ],
+        // // 编程题推荐数据
+        // programRecom: {
+        //   'hotRecom': [],
+        //   'personalRecom': [],
+        //   'articleRecom': []
+        // }
       }
     },
     computed: {

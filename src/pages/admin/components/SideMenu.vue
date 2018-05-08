@@ -23,7 +23,7 @@
       <template slot="title"><i class="el-icon-fa-list"></i>小题题库</template>
       <el-menu-item index="/small-problems">小题列表</el-menu-item>
       <el-menu-item index="/small-problem/create">创建小题</el-menu-item>
-      <el-menu-item index="">导入 / 导出</el-menu-item>
+      <el-menu-item index="/small-problem/batch_ops">导入 / 导出</el-menu-item>
     </el-submenu>
     <el-submenu index="contest">
       <template slot="title"><i class="el-icon-fa-trophy"></i>竞赛</template>
@@ -31,9 +31,9 @@
       <el-menu-item index="/contest/create">创建竞赛</el-menu-item>
     </el-submenu>
     <el-submenu index="course">
-      <template slot="title"><i class="el-icon-fa-group"></i>小组</template>
-      <el-menu-item index="/courses">小组列表</el-menu-item>
-      <el-menu-item index="/course/create">创建小组</el-menu-item>
+      <template slot="title"><i class="el-icon-fa-group"></i>课程</template>
+      <el-menu-item index="/courses">课程列表</el-menu-item>
+      <el-menu-item index="/course/create">创建课程</el-menu-item>
     </el-submenu>
   </el-menu>
 </template>

@@ -95,6 +95,7 @@ export default new VueRouter({
           name: 'contest-problem-list',
           component: ProblemList
         },
+        // 创建竞赛题目路由
         {
           path: '/contest/:contestId/problem/create',
           name: 'create-contest-problem',
@@ -144,13 +145,13 @@ export default new VueRouter({
         },
         // 课程主页路由
         {
-          path: '/course/:courseId/',
+          path: '/course/:courseId',
           name: 'course-home',
           component: Course.CourseHome,
           children: [
             // 课程简介路由
             {
-              path: 'intro',
+              path: '',
               name: 'course-intro',
               component: Course.CourseIntro
             },
@@ -160,16 +161,49 @@ export default new VueRouter({
               name: 'course-announcement',
               component: Course.Announcement
             },
+            // 课程成员路由
             {
               path: 'member',
               name: 'course-member',
               component: Course.Member
             },
+            // 课程单元列表
             {
               path: 'units',
               name: 'course-unit-list',
               component: Course.UnitList
             },
+            // 课程单元的题目列表
+            {
+              path: 'unit/:taskId/problems',
+              name: 'course-unit-problem-list',
+              component: Course.UnitProblemList
+            },
+            // 创建课程单元的编程题题目
+            {
+              path: 'unit/:taskId/problem/create',
+              name: 'create-unit-problem',
+              component: Problem
+            },
+            // 修改课程单元的编程题题目
+            {
+              path: 'unit/:taskId/problem/:problemId/edit',
+              name: 'edit-course-unit-problem',
+              component: Problem
+            },
+            // 创建课程单元的小题题目
+            {
+              path: 'unit/:taskId/sm-problem/create',
+              name: 'create-unit-small-problem',
+              component: smProblem
+            },
+            // 修改课程单元的小题题目
+            {
+              path: 'unit/:taskId/sm-problem/:problemId/edit',
+              name: 'edit-unit-small-problem',
+              component: smProblem
+            },
+            // 课程设置路由
             {
               path: 'setting',
               name: 'course-setting',
@@ -177,7 +211,7 @@ export default new VueRouter({
             },
             {
               path: '*',
-              redirect: 'intro'
+              redirect: {name: 'course-intro'}
             }
           ]
         }

@@ -48,6 +48,7 @@ function downloadFile (url) {
   return new Promise((resolve, reject) => {
     Vue.prototype.$http.get(url, {responseType: 'blob'}).then(resp => {
       let headers = resp.headers
+      console.log(resp)
       if (headers['content-type'].indexOf('json') !== -1) {
         let fr = new window.FileReader()
         if (resp.data.error) {

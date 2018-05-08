@@ -1,7 +1,7 @@
 'use strict'
 // Template version: 1.1.1  https://qduoj.com
 // see http://vuejs-templates.github.io/webpack for documentation.
-process.env.TARGET='https://qduoj.com/'//自己加的192.168.1.139:8000
+process.env.TARGET='https://qduoj.com/'//自己加的110.65.98.121:8000
 process.env.TARGET='http://110.65.98.121:8000/'
 const path = require('path')
 const commonProxy = {
@@ -21,8 +21,7 @@ module.exports = {
     adminTemplate: path.resolve(__dirname, '../src/pages/admin/index.html'),
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    // 自己更改的,请求资源的目录 打包好的css等都放在该文件夹下
-    assetsPublicPath: '/dist/',//原:__STATIC_CDN_HOST__
+    assetsPublicPath: '/__STATIC_CDN_HOST__/',//原:__STATIC_CDN_HOST__
     productionSourceMap: process.env.USE_SENTRY === '1',
     // Gzip off by default as many popular static hosts such as
     // Surge or Netlify already gzip all static assets for you.

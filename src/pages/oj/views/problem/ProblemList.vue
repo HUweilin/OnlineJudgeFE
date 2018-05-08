@@ -20,8 +20,8 @@
     </Col>
     <Col :sm="19" :xs="24">
       <Panel shadow>
-        <div slot="title">题库列表</div>
-        <div slot="extra">
+        <div slot="title" class="hidden-xs">题库列表</div>
+        <div slot="extra" class="hidden-xs">
           <ul class="filter">
             <li>
               <Dropdown v-if="routeName === 'problem-list'" @on-click="filterByDifficulty">
@@ -63,21 +63,29 @@
           </ul>
         </div>
         <Table ref="table" style="width: 100%; font-size: 16px;"
+               v-if="!mobileFlag"
                :columns="problemTableColumns"
                :height="clientHeight"
                :data="problemList"
                :loading="loadings.table"
                size="small"
                disabled-hover></Table>
+        <Table ref="table" style="width: 100%; font-size: 16px;"
+          v-else
+          :columns="mobileTableColumns"
+          :height="clientHeight"
+          :data="problemList"
+          :loading="loadings.table"
+          size="small"
+          disabled-hover></Table>
       </Panel>
       <Pagination :total="total" :page-size="limit" @on-change="pushRouter" :current.sync="query.page"></Pagination>
     </Col>
     <modal v-model="showSmallPro" scrollable="true" width="40%">
-      <div slot="header">{{smallProblem._id}}</div>
+      <div slot="header">{{smallProblem.title}}</div>
       <component :is="smallProType" v-if="showSmallPro" :problem="smallProblem" @succeed="init('true')"></component>
       <div slot="footer" style="display: none;"></div>
     </modal>
-    
   </Row>
 </template>
 
@@ -106,6 +114,7 @@
         tagList: [],
         problemTableColumns: [
           {
+            width: '80',
             title: '编号',
             align: 'center',
             render: (h, params) => {
@@ -133,6 +142,7 @@
           {
             title: '题目',
             width: '35%',
+            align: 'center',
             render: (h, params) => {
               return h('Button', {
                 props: {
@@ -153,6 +163,19 @@
                   'box-shadow': 'none !important'
                 }
               }, params.row.title)
+            }
+          },
+          {
+            title: '类型',
+            align: 'center',
+            render: (h, params) => {
+              let type = params.row.type
+              if (type) {
+                type = SMALL_PROBLEM_TYPE[type].name
+              } else {
+                type = '编程题'
+              }
+              return h('span', type)
             }
           },
           {
@@ -184,6 +207,47 @@
             }
           }
         ],
+        mobileTableColumns: [
+          {
+            title: '题目',
+            width: '35%',
+            align: 'center',
+            render: (h, params) => {
+              return h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large'
+                },
+                on: {
+                  click: () => {
+                    if (this.routeName === 'problem-list') {
+                      this.$router.push({name: 'problem-details', params: {problemID: params.row._id}})
+                    } else if (this.routeName === 'small-problem-list') {
+                      this.openSmallProModal(params.row)
+                    }
+                  }
+                },
+                style: {
+                  padding: '2px 0',
+                  'box-shadow': 'none !important'
+                }
+              }, params.row.title)
+            }
+          },
+          {
+            title: '类型',
+            align: 'center',
+            render: (h, params) => {
+              let type = params.row.type
+              if (type) {
+                type = SMALL_PROBLEM_TYPE[type].name
+              } else {
+                type = '编程题'
+              }
+              return h('span', type)
+            }
+          }
+        ],
         problemList: [],
         limit: 20,
         total: 0,
@@ -210,7 +274,9 @@
           'Single': '单选题',
           'Multiple': '多选题',
           'Blank': '填空题'
-        }
+        },
+        // 判断PC或mobile
+        mobileFlag: false
       }
     },
     mounted () {
@@ -231,6 +297,7 @@
         this.query.keyword = query.keyword || ''
         this.query.tag = query.tag || ''
         this.query.page = parseInt(query.page) || 1
+        this.mobileFlag = this._isMobile()
         if (this.query.page < 1) {
           this.query.page = 1
         }
@@ -255,7 +322,11 @@
           this.problemList = res.data.data.results
           if (this.isAuthenticated) {
             // 若是登录状态则添加一栏(做题结果)
-            this.addStatusColumn(this.problemTableColumns, res.data.data.results)
+            if (!this.mobileFlag) {
+              this.addStatusColumn(this.problemTableColumns, res.data.data.results)
+            } else {
+              this.addStatusColumn(this.mobileTableColumns, res.data.data.results)
+            }
           }
         }, res => {
           this.loadings.table = false
@@ -327,31 +398,18 @@
         }
         this.$refs.tagCtrl.$el.style.height = height + 'px'
       },
+      // 判断PC还是mobile
+      _isMobile () {
+        let flag = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)
+        return flag
+      },
       // 打开小题弹窗
       openSmallProModal (pro) {
-        // 向后台获取小题全部信息
-        // 是在这里获取，让其发送请求
-        api.getSmallProblem(pro._id).then(res => {
-          let problem = res.data.data
-          // 若已登录 则将my_status和my_answer的结果也传进去
-          if (this.isAuthenticated) {
-            problem.my_status = pro.my_status
-            problem.my_answer = pro.my_answer
-          }
-          this.smallProblem = problem
-          // Single 为单选 Multiple 为多选 Blank 为填空
-
-          this.smallProType = SMALL_PROBLEM_TYPE[problem.type]
-        }, res => {
-          console.log('失败le')
-        })
-        this.$nextTick(() => {})
+        // 小题信息已全部获取 不需要再发送请求
+        this.smallProblem = pro
+        // Single 为单选 Multiple 为多选 Blank 为填空
+        this.smallProType = SMALL_PROBLEM_TYPE[pro.type].value
         this.showSmallPro = true
-      },
-      // 关闭小题弹窗
-      closeSmallPro () {
-        this.showSmallPro = false
-        this.smallProblem = {}
       }
     },
     computed: {

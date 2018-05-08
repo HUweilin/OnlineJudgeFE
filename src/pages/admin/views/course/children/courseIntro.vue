@@ -1,5 +1,9 @@
 <template>
-  <Panel :title="course.title" v-if="course">
+  <Panel v-if="course">
+    <div slot="title">
+      <span class="name">{{course.title}}</span>
+      <span class="code">课程代码：{{course.code}}</span>
+    </div>
     <div class="intro-container">
       <div class="intro-item first-item">
       	<div class="course-info">
@@ -31,6 +35,15 @@
   }
 </script>
 <style lang="less" scoped>
+  .name {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .code {
+    font-size: 14px;
+    margin-left: 10px;
+    color: #409EFF;
+  }
   .intro-container {
     .intro-item {
       font-size: 18px;

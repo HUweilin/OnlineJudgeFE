@@ -21,7 +21,7 @@ const state = {
 }
 
 const getters = {
-  // contest 是否加载完成
+  // contest 是否加载完成 status都是字符串 结果都为true 若无该值才为false
   contestLoaded: (state) => {
     return !!state.contest.status
   },
@@ -82,7 +82,7 @@ const getters = {
       let duration = moment.duration(getters.contestStartTime.diff(state.now, 'seconds'), 'seconds')
       // time is too long
       if (duration.weeks() > 0) {
-        return duration.humanize() + '开始'
+        return duration.days() + '天后开始'
       }
       let texts = [Math.floor(duration.asHours()), duration.minutes(), duration.seconds()]
       return '-' + texts.join(':')

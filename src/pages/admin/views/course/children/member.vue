@@ -31,7 +31,7 @@
         </el-pagination>
       </div>
     </div>
-    <el-dialog title="上传学生名单" width="80%" :visible.sync="showUploadDialog">
+    <el-dialog title="上传学生名单" width="60%" :visible.sync="showUploadDialog">
       <div class="notices">
         <div class="notice">
           <span class="el-icon-warning"></span>
@@ -39,15 +39,15 @@
         </div>
         <div class="notice">
           <span class="el-icon-warning"></span>
-          文件的每一行为一个学生信息 (表头为username eamil)
+          文件的每一行为一个学生信息 (表头为username)
         </div>
         <div class="notice">
           <span class="el-icon-warning"></span>
           具体格式如下
           <ul class="list">
-          	<li>username email</li>
-          	<li>名字1 xxxxx</li>
-          	<li>名字2 yyyyy</li>
+          	<li>username</li>
+          	<li>名字1</li>
+          	<li>名字2</li>
           </ul>
         </div>
       </div>
@@ -65,17 +65,13 @@
             <el-input size="mini" class="inp" v-model="addStu.username">
               <template slot="prepend">姓名</template>
             </el-input>
-            <el-input size="mini" class="inp" v-model="addStu.email">
-              <template slot="prepend">邮箱</template>
-            </el-input>
             <el-button size="small" type="primary" @click="addUploadStu">添加</el-button>
             <el-button size="small" type="danger" @click="emptyUploadStu">清空表格</el-button>
           </div>
-          <div class="data-error" v-if="dataError">邮箱、姓名只能小于 20 位,均不能为空</div>
+          <div class="data-error" v-if="dataError">姓名长度必须小于 20 位,均不能为空</div>
           <el-table :data="uploadStu" border>
             <el-table-column label="序号" width="50" type="index" :index="indexMethod"></el-table-column>
             <el-table-column align="center" label="姓名" width="150" prop="username"></el-table-column>
-            <el-table-column align="center" label="邮箱" prop="email"></el-table-column>
             <el-table-column align="center" label="操作" width="80">
               <template slot-scope="scope">
                 <el-button size="small" type="danger" @click="deleteUploadStu(scope.$index)">删除</el-button>
@@ -108,15 +104,16 @@
         // 存储被选中的学生id
         studentSel: [],
         showUploadDialog: false,
-        // 真正上传到后台的数据
+        // 上传文件，展示解析后的学生数据
         uploadStu: [],
         // 手动添加的学生变量
         addStu: {
-          username: '',
-          email: ''
+          username: ''
         },
         // 控制错误信息的显示(手动添加的数据信息)
-        dataError: false
+        dataError: false,
+        // 判断手动添加的用户名是否存在
+        isExistUser: false
       }
     },
     mounted () {
@@ -129,7 +126,7 @@
         this.loading = true
         api.getCourseMember(this.courseID).then(res => {
           this.loading = false
-          this.students = res.data.data.results
+          this.students = res.data.data
           // 分割数据进行展示
           this.setDisplayStudents()
         }, res => {
@@ -163,6 +160,8 @@
             // 请求成功后重新获取学生信息
             this.$success('删除成功')
             this.getCourseMember()
+            // 更新course的数据
+            this.$emit('update-course')
           }, res => {
             this.$error(res.data.data)
           })
@@ -219,7 +218,9 @@
             }
           }
           let results = []
+          // 上传文件的表头
           let keys = Object.keys(persons[0])
+          // 遍历提取出的数组，取出每个对象的值 放入uploadStu中
           persons.forEach(obj => {
             let res = {}
             keys.forEach(key => {
@@ -233,12 +234,13 @@
       },
       // 手动添加信息到uploadStu
       addUploadStu () {
-        let emailReg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
-        if (!emailReg.test(this.addStu.email) || this.addStu.username === '') {
+        if (this.addStu.username === '') {
           this.dataError = true
           return
         }
-        this.uploadStu.unshift(this.addStu)
+        let data = Object.assign({}, this.addStu)
+        this.uploadStu.unshift(data)
+        this.addStu.username = ''
       },
       // 删除上传的excel对应行的信息
       deleteUploadStu (index) {
@@ -250,15 +252,25 @@
       },
       // 数据上传到后台
       uploadData () {
+        // uploadStu中存放的是一个个对象，需要传的只是其中的username
+        let students = []
+        this.uploadStu.forEach((obj) => {
+          students.push(obj.username)
+        })
         let data = {
           course_id: this.courseID,
-          students: this.uploadStu
+          students: students
         }
         api.addCourseMember(data).then(res => {
           // 上传成功后重新获取数据
           this.getCourseMember()
+          this.showUploadDialog = false
+          this.emptyUploadStu()
+          // 更新course的数据
+          this.$emit('update-course')
         }, res => {
           this.$error(res.data.data)
+          // this.showUploadDialog = false
         })
       }
     }
@@ -307,6 +319,12 @@
         .inp {
           width: 30%;
           vertical-align: middle;
+        }
+        .noExist {
+          display: inline-block;
+          font-size: 12px;
+          color: red;
+          margin: 0 10px;
         }
       }
       .data-error {
