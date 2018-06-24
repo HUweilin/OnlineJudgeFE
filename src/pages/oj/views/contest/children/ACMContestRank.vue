@@ -7,24 +7,27 @@
         <Icon type="android-settings" size="20"></Icon>
         <div slot="content" id="switches">
           <p>
-            <span>Menu</span>
+            <span>菜单</span>
             <i-switch v-model="showMenu"></i-switch>
-            <span>Chart</span>
+            <span>图表</span>
             <i-switch v-model="showChart"></i-switch>
           </p>
           <p>
-            <span>Auto Refresh(10s)</span>
+            <span>自动刷新(10s)</span>
             <i-switch :disabled="refreshDisabled" @on-change="handleAutoRefresh"></i-switch>
           </p>
           <template v-if="isContestAdmin">
             <p>
-              <span>RealName</span>
+              <span>真实姓名</span>
               <i-switch v-model="showRealName"></i-switch>
             </p>
             <p>
-              <span>Force Update</span>
+              <span>强制更新</span>
               <i-switch :disabled="refreshDisabled" v-model="forceUpdate"></i-switch>
             </p>
+          </template>
+          <template>
+            <Button type="primary" size="small" @click="downloadRankCSV">下载表格</Button>
           </template>
         </div>
       </Poptip>
@@ -310,6 +313,9 @@
       parseTotalTime (totalTime) {
         let m = moment.duration(totalTime, 's')
         return [Math.floor(m.asHours()), m.minutes(), m.seconds()].join(':')
+      },
+      downloadRankCSV () {
+        utils.downloadFile(`contest_rank?download_csv=1&contest_id=${this.$route.params.contestID}&force_refrash=${this.forceUpdate ? '1' : '0'}`)
       }
     }
   }

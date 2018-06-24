@@ -14,6 +14,7 @@ import IconBtn from './components/btn/IconBtn.vue'
 import Save from './components/btn/Save.vue'
 import Cancel from './components/btn/Cancel.vue'
 import './style.less'
+import VueI18n from 'vue-i18n'
 
 // register global utility filters.
 Object.keys(filters).forEach(key => {
@@ -21,12 +22,24 @@ Object.keys(filters).forEach(key => {
 })
 
 Vue.use(Element, {locale})
-// Vue.use(Element)
-// Vue.use(VueI18n)
+Vue.use(VueI18n)
 Vue.component(IconBtn.name, IconBtn)
 Vue.component(Panel.name, Panel)
 Vue.component(Save.name, Save)
 Vue.component(Cancel.name, Cancel)
+
+// load language packages
+const i18n = new VueI18n({
+  locale: 'zh-CN',
+  messages: {
+    'en-US': require('./common/lang/en'),
+    'zh-CN': require('./common/lang/zh')
+  }
+})
+
+Vue.use(Element, {
+  i18n: (key, value) => i18n.t(key, value)
+})
 
 Vue.prototype.$error = (msg) => {
   Vue.prototype.$message({'message': msg, 'type': 'error'})
@@ -44,4 +57,4 @@ Vue.prototype.$success = (msg) => {
   }
 }
 
-new Vue(Vue.util.extend({router, store}, App)).$mount('#app')
+new Vue(Vue.util.extend({router, store, i18n}, App)).$mount('#app')

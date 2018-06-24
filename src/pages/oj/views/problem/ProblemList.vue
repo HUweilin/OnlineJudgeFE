@@ -374,8 +374,8 @@
           parent = parent.offsetParent
         }
         let winHei = client().height
-        // 82、66为分页控件和底部footer的高(包括margin)
-        let height = winHei - distance - 82 - 66
+        // 82、90为分页控件和底部footer的高(包括margin)
+        let height = winHei - distance - 82 - 90
         if (height <= 0) {
           height = 100
         }
@@ -391,7 +391,7 @@
           distance += parent.offsetTop
           parent = parent.offsetParent
         }
-        // 82为底部footer的高(包括margin)
+        // 82为分页控件的高(包括margin)
         let height = winHei - distance - 82
         if (height <= 70) {
           height = 100

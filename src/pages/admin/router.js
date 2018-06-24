@@ -146,7 +146,6 @@ export default new VueRouter({
         // 课程主页路由
         {
           path: '/course/:courseId',
-          name: 'course-home',
           component: Course.CourseHome,
           children: [
             // 课程简介路由

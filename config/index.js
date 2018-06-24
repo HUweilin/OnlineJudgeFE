@@ -13,6 +13,7 @@ const commonProxy = {
 }
 
 module.exports = {
+  // 生产环境
   build: {
     env: require('./prod.env'),
     ojIndex: path.resolve(__dirname, '../dist/index.html'),
@@ -21,7 +22,7 @@ module.exports = {
     adminTemplate: path.resolve(__dirname, '../src/pages/admin/index.html'),
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/__STATIC_CDN_HOST__/',//原:__STATIC_CDN_HOST__
+    assetsPublicPath: '/__STATIC_CDN_HOST__/',
     productionSourceMap: process.env.USE_SENTRY === '1',
     // Gzip off by default as many popular static hosts such as
     // Surge or Netlify already gzip all static assets for you.

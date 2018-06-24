@@ -291,7 +291,6 @@
         // 是课程界面 设置题目所占宽度
         this.colNum = 24
       }
-      console.log(this.courseProblemSubmitDisabled)
     },
     methods: {
       init () {

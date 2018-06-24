@@ -27,7 +27,6 @@
             <span v-show="!row.isEditing">{{row._id}}</span>
             <el-input v-show="row.isEditing" v-model="row._id"
                       @keyup.enter.native="handleInlineEdit(row)">
-
             </el-input>
           </template>
         </el-table-column>

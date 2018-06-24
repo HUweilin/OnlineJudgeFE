@@ -1,6 +1,6 @@
 <template>
   <div class="announcement view">
-    <Panel title="公告">
+    <Panel :title="$t('m.General_Announcement')">
       <div class="list">
         <el-table
           v-loading="loading"
@@ -15,30 +15,30 @@
           </el-table-column>
           <el-table-column
             prop="title"
-            label="标题">
+            :label="$t('m.ID')">
           </el-table-column>
           <el-table-column
             prop="create_time"
-            label="创建时间">
+            :label="$t('m.Create_Time')">
             <template slot-scope="scope">
               {{ scope.row.create_time | localtime }}
             </template>
           </el-table-column>
           <el-table-column
             prop="last_update_time"
-            label="最近更新时间">
+            :label="$t('m.Last_Update_Time')">
             <template slot-scope="scope">
               {{scope.row.last_update_time | localtime }}
             </template>
           </el-table-column>
           <el-table-column
             prop="created_by.username"
-            label="创建者">
+            :label="$t('m.Created_By_Name')">
           </el-table-column>
           <el-table-column
             width="100"
             prop="visible"
-            label="是否可见">
+            :label="$t('m.Visible')">
             <template slot-scope="scope">
               <el-switch v-model="scope.row.visible"
                          active-text=""
@@ -49,16 +49,16 @@
           </el-table-column>
           <el-table-column
             fixed="right"
-            label="操作"
+            :label="$t('m.operation')"
             width="200">
             <div slot-scope="scope">
-              <icon-btn name="修改" icon="edit" @click.native="openAnnouncementDialog(scope.row.id)"></icon-btn>
-              <icon-btn name="删除" icon="trash" @click.native="deleteAnnouncement(scope.row.id)"></icon-btn>
+              <icon-btn :name="$t('m.edit')" icon="edit" @click.native="openAnnouncementDialog(scope.row.id)"></icon-btn>
+              <icon-btn :name="$t('m.delete')" icon="trash" @click.native="deleteAnnouncement(scope.row.id)"></icon-btn>
             </div>
           </el-table-column>
         </el-table>
         <div class="panel-options">
-          <el-button type="primary" size="small" @click="openAnnouncementDialog(null)" icon="el-icon-plus">创建</el-button>
+          <el-button type="primary" size="small" @click="openAnnouncementDialog(null)" icon="el-icon-plus">{{$t('m.Create')}}</el-button>
           <el-pagination
             v-if="!contestID"
             class="page"
@@ -74,17 +74,17 @@
     <el-dialog :title="announcementDialogTitle" :visible.sync="showEditAnnouncementDialog"
                @open="onOpenEditDialog" :close-on-click-modal="false">
       <el-form label-position="top">
-        <el-form-item label="标题" required>
+        <el-form-item :label="$t('m.Announcement_Title')" required>
           <el-input
             v-model="announcement.title"
-            placeholder="标题" class="title-input">
+            :placeholder="$t('m.Announcement_Title')" class="title-input">
           </el-input>
         </el-form-item>
-        <el-form-item label="内容" required>
+        <el-form-item :label="$t('m.Announcement_Content')" required>
           <Simditor v-model="announcement.content"></Simditor>
         </el-form-item>
         <div class="visible-box">
-          <span>是否可见</span>
+          <span>{{$t('m.Announcement_Status')}}</span>
           <el-switch
             v-model="announcement.visible"
             active-text=""

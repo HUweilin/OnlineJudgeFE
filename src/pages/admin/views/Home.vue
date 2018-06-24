@@ -8,7 +8,7 @@
       <el-dropdown @command="handleCommand">
         <span>{{user.username}}<i class="el-icon-caret-bottom el-icon--right"></i></span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="logout">退出</el-dropdown-item>
+          <el-dropdown-item command="logout">{{$t('m.exit')}}</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
@@ -17,6 +17,7 @@
         <router-view></router-view>
       </transition>
       <div class="footer">
+        <el-button type="text" class="btn btn-success" @click="changeLocale()">简体中文 / English</el-button>&nbsp;
         Build Version: {{ version }}
       </div>
     </div>
@@ -59,6 +60,15 @@
           api.logout().then(() => {
             this.$router.push({name: 'login'})
           })
+        }
+      },
+      changeLocale () {
+        // 通过默认locale切换语言
+        console.log(this.$i18n)
+        if (this.$i18n.locale === 'zh-CN') {
+          this.$i18n.locale = 'en-US'
+        } else {
+          this.$i18n.locale = 'zh-CN'
         }
       }
     },
